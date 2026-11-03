@@ -49,63 +49,7 @@
     return [c.element, c.subElement].filter(Boolean).map(function (k) { return EL(k).name; }).join(' · ');
   }
 
-  /* 게임과 같은 기록 내보내기 · 불러오기 (설정 창에서 사용) */
-  function ioModal(title, html, buttons) {
-    const old = stage.querySelector('.cs-io'); if (old) old.remove();
-    const m = U.el('div', 'cs-rec cs-io');
-    const box = U.el('div', 'cs-rec-box cs-io-box g-panel', { html: '<div class="cs-rec-title">' + U.esc(title) + '</div><div class="cs-io-text">' + html + '</div>' });
-    const row = U.el('div', 'cs-io-actions');
-    buttons.forEach(function (b) {
-      const el = U.el('button', 'g-btn' + (b.primary ? ' g-btn-primary' : ''), { type: 'button', text: b.text });
-      el.addEventListener('click', function () { m.remove(); if (b.onClick) b.onClick(); });
-      row.appendChild(el);
-    });
-    box.appendChild(row);
-    m.appendChild(box);
-    m.addEventListener('click', function (e) { if (e.target === m) m.remove(); });
-    stage.appendChild(m);
-  }
-  G.saveIO = {
-    exportSave: function () {
-      try {
-        const d = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
-        const blob = new Blob([JSON.stringify(G.save.exportData(), null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'game-save_' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + '.json';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-        ioModal('기록 내보내기', '클리어한 스테이지 <b>' + G.save.clearedCount() + '개</b>와 편성 · 설정을 파일로 저장했습니다.', [{ text: '확인', primary: true }]);
-      } catch (e) {
-        ioModal('기록 내보내기', '파일을 만들지 못했습니다. (' + U.esc(e.message) + ')', [{ text: '확인', primary: true }]);
-      }
-    },
-    pickImport: function () {
-      const input = document.createElement('input');
-      input.type = 'file'; input.accept = '.json,application/json';
-      input.addEventListener('change', function () {
-        const f = input.files && input.files[0];
-        if (!f) return;
-        const r = new FileReader();
-        r.onload = function () {
-          let obj = null;
-          try { obj = JSON.parse(String(r.result)); } catch (e) {}
-          if (!obj) { ioModal('기록 불러오기', '파일을 읽을 수 없습니다. 내보내기로 만든 .json 파일인지 확인해 주세요.', [{ text: '확인', primary: true }]); return; }
-          ioModal('기록 불러오기', '<b>' + U.esc(f.name) + '</b><br>이 파일의 기록으로 <b>지금 기록을 덮어씁니다.</b> 계속할까요?', [
-            { text: '취소' },
-            { text: '불러오기', primary: true, onClick: function () {
-              try {
-                const res = G.save.importData(obj);
-                ioModal('기록 불러오기', '기록을 불러왔습니다. (클리어한 스테이지 ' + res.cleared + '개)', [{ text: '확인', primary: true }]);
-              } catch (e) { ioModal('기록 불러오기', U.esc(e.message), [{ text: '확인', primary: true }]); }
-            } }
-          ]);
-        };
-        r.readAsText(f);
-      });
-      input.click();
-    }
-  };
+  /* 기록 내보내기 · 불러오기: 게임과 같은 파일 (../게임/game-site/js/core/saveio.js · G.saveIO) */
 
   /* ── 화면 전환 ─────────────────────────────────────── */
   function show(name) {
@@ -165,6 +109,16 @@
       G.loading.go(new URL(GAME_URL, location.href).href + '?return=' + encodeURIComponent(back));   // 로딩 화면 + 기록 함께 보냄
     });
     $('btn-manage').addEventListener('click', function () { go('#archive'); });
+    /* 보충 수업: 게임 사이트의 보충 수업 화면(#/lesson)으로 — 왼쪽 위에 주간 토벌 초기화까지 남은 시간 */
+    $('btn-lesson').addEventListener('click', function () {
+      const back = location.href.split('#')[0];
+      G.loading.go(new URL(GAME_URL, location.href).href + '?return=' + encodeURIComponent(back) + '#/lesson');
+    });
+    function lessonLeft() { $('lb-lesson-left').textContent = '주간 토벌 ' + G.lesson.fmt(G.lesson.weeklyLeft(), true); }
+    lessonLeft();
+    setInterval(lessonLeft, 30000);
+    $('lb-notice').addEventListener('click', function () { MAIN.notice.open(stage); });   // 공지: 수정 내역 (패치노트)
+    $('lb-guide').addEventListener('click', function () { MAIN.guide.open(stage); });     // 가이드: 메인 화면 버튼 설명
     $('lb-records').addEventListener('click', function () { go('#records'); });   // 축음기 → 배경 음악 고르기
     $('lb-settings').addEventListener('click', function (e) { e.stopPropagation(); G.settings.open(stage); });
 
@@ -193,8 +147,6 @@
   /* ════════════════════════════════════════════════════
      2. 캐릭터 선택 — 탁자 위 세로 사진
      ════════════════════════════════════════════════════ */
-  const TILT = [-1.4, 0.9, -0.5, 1.2, -1, 0.6, -1.3, 1, -0.7, 0.4, -0.9, 1.3];
-
   function initSelect() {
     $('sl-back').addEventListener('click', function () { go(''); });
     $('sl-set').addEventListener('click', function (e) { e.stopPropagation(); G.settings.open(stage); });
@@ -240,25 +192,29 @@
     list.forEach(function (c, i) { grid.appendChild(makePhoto(c, i)); });
   }
 
-  /* 타로카드 한 장: 아치 창 안의 캐릭터 · 별 · 리본(번호 · 영문 이름) · 한글 이름 · 속성 */
-  function roman(n) {
-    const t = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]; let r = '';
-    t.forEach(function (p) { while (n >= p[0]) { r += p[1]; n -= p[0]; } });
-    return r;
-  }
+  /* 타로카드 한 장 (게임/테두리 폴더의 그림 · images/card/)
+   *  아래부터: 배경(블랙 · 화이트) → 캐릭터 → 속성 색 그라데이션 · 별 6개 · 이름 → 테두리(커튼) → 장식(리스)
+   *  · 블랙 속성 캐릭터(메인 · 서브 중 하나라도 black)는 달 무늬 배경 · 달 장식, 나머지는 별 무늬 · 별 장식
+   *  · 그라데이션 색 = 캐릭터의 메인 속성 색 (G.DATA.elements) */
+  const STAR8 = (function () {
+    let p = '';
+    for (let k = 0; k < 16; k++) { const r = k % 2 ? 4.2 : 10, a = Math.PI / 8 * k - Math.PI / 2; p += (k ? 'L' : 'M') + (12 + r * Math.cos(a)).toFixed(2) + ' ' + (12 + r * Math.sin(a)).toFixed(2); }
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + p + 'Z"/></svg>';
+  })();
   function makePhoto(c) {
     const d = c.data;
-    const card = U.el('button', 'ph', { type: 'button', 'data-sfx': 'card_pick', 'aria-label': d.name });
-    card.style.setProperty('--char', d.themeColor);
+    const black = d.element === 'black' || d.subElement === 'black';
+    const card = U.el('button', 'tc' + (black ? ' is-black' : ''), { type: 'button', 'data-sfx': 'card_pick', 'aria-label': d.name });
+    card.style.setProperty('--el', EL(d.element).color);
     card.innerHTML =
-      '<span class="ph-window"><span class="ph-rays"></span>' +
-        '<img src="' + c.sprite + '" alt=""' + (c.placeholder ? ' class="is-ph"' : '') + '></span>' +
-      '<svg class="ph-frame" viewBox="0 0 250 420" aria-hidden="true"><use href="#tarot-frame"/></svg>' +
-      '<span class="ph-ribbon">' + roman(c.no) + '. ' + U.esc((d.nameEn || '').split(' ')[0].toUpperCase()) + '</span>' +
-      '<span class="ph-cap"><span class="ph-name">' + U.esc(d.name) + '</span>' +
-        '<span class="ph-elems">' + [d.element, d.subElement].filter(Boolean).map(function (k) {
-          return '<i style="--el:' + EL(k).color + '">' + G.icons.svg(EL(k).icon) + '</i>';
-        }).join('') + '</span></span>';
+      '<span class="tc-art">' +
+        '<img class="tc-back" src="images/card/back_' + (black ? 'black' : 'white') + '.webp" alt="">' +
+        '<img class="tc-char' + (c.placeholder ? ' is-ph' : '') + '" src="' + c.sprite + '" alt="">' +
+        '<span class="tc-grad"></span>' +
+        '<span class="tc-cap"><span class="tc-stars">' + new Array(7).join(STAR8) + '</span><span class="tc-name">' + U.esc(d.name) + '</span></span>' +
+      '</span>' +
+      '<img class="tc-frame" src="images/card/frame.webp" alt="">' +
+      '<img class="tc-wreath" src="images/card/wreath_' + (black ? 'black' : 'white') + '.webp" alt="">';
     card.addEventListener('click', function (e) {
       const grid = $('sl-grid');
       if (grid.classList.contains('is-locked')) return;
@@ -337,9 +293,14 @@
     }).join('');
 
     /* 특성(메커니즘): 이름 + 설명 */
+    /*  카드에는 한 줄 요약(short)만 → 잘리지 않고 바로 보임 · 자세한 설명은 마우스를 올리거나 길게 누르면 */
     $('dt-mechs').innerHTML = (d.mechanics || []).map(function (m) {
-      return '<li><span class="mc-ico">' + G.icons.svg(m.icon || 'burst') + '</span><div><b>' + U.esc(m.name) + '</b><p>' + U.esc(m.desc) + '</p></div></li>';
+      return '<li' + (m.element ? ' class="is-elem is-' + m.element + '"' : '') + '><span class="mc-ico">' + G.icons.svg(m.icon || 'burst') + '</span><div><b>' + U.esc(m.name) + '</b><p>' + U.esc(m.short || m.desc) + '</p></div></li>';
     }).join('');
+    Array.prototype.forEach.call($('dt-mechs').children, function (li, i) {
+      const m = d.mechanics[i];
+      li._tip = function () { return '<div class="tt-title">' + U.esc(m.name) + '</div>' + U.esc(m.desc); };
+    });
 
     /* 가운데 캐릭터 */
     const hero = $('dt-hero-img');

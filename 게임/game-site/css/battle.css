@@ -420,7 +420,7 @@
   position: absolute; right: 36px; top: 300px; z-index: 40; width: 96px;
   display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: default;
 }
-.bt-bolt-ico { position: relative; width: 92px; height: 92px; color: #b9a8ff; filter: drop-shadow(0 0 10px rgba(150,120,255,0.55)); }
+.bt-bolt-ico { position: relative; width: 92px; height: 92px; color: #ffd54a; filter: drop-shadow(0 0 10px rgba(240,190,40,0.55)); }
 .bt-bolt-ico .g-icon { width: 92px; height: 92px; fill: rgba(40,28,90,0.9); stroke: #c9bcff; stroke-width: 1.2; }
 .bt-bolt-n {
   position: absolute; left: 50%; top: 52%; transform: translate(-50%,-50%);
@@ -462,8 +462,8 @@
 
 .fx-svg { left: 0 !important; top: 0 !important; width: 1920px; height: 920px; transform: none !important; overflow: visible; }
 .fx-spark.is-volt { background: #e2d8ff; box-shadow: 0 0 8px 2px #9b80ff; }
-.fx-volt-orb { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #cbbcff 30%, rgba(120,90,255,0.6) 60%, transparent 72%); box-shadow: 0 0 60px 20px rgba(140,110,255,0.6); }
-.fx-volt-beam { height: 120px; background: linear-gradient(180deg, transparent, rgba(160,130,255,0.75) 30%, #fff 50%, rgba(160,130,255,0.75) 70%, transparent); box-shadow: 0 0 60px rgba(150,120,255,0.8); }
+.fx-volt-orb { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #ffe9a0 30%, rgba(240,180,30,0.6) 60%, transparent 72%); box-shadow: 0 0 60px 20px rgba(240,190,40,0.6); }
+.fx-volt-beam { height: 120px; background: linear-gradient(180deg, transparent, rgba(250,200,60,0.75) 30%, #fff 50%, rgba(250,200,60,0.75) 70%, transparent); box-shadow: 0 0 60px rgba(240,190,40,0.8); }
 .fx-plug { width: 60px; height: 60px; border: 4px solid #ffd75e; background: rgba(60,44,0,0.6); box-shadow: 0 0 24px #ffd75e, inset 0 0 14px #ffd75e; }
 .fx-cloud { width: 900px; height: 170px; border-radius: 50%; background: radial-gradient(ellipse at 50% 60%, rgba(70,62,40,0.95) 0%, rgba(40,36,26,0.9) 45%, transparent 72%); box-shadow: 0 30px 80px rgba(255,215,94,0.25); }
 
@@ -471,7 +471,7 @@
 .bt-status.is-chip { width: auto; height: 30px; padding: 0 8px 0 5px; gap: 5px; justify-content: flex-start; }
 .bt-status.is-chip span { font-size: 12px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap; }
 .bt-status.is-chip b { font-family: var(--font-mono); font-size: 11px; font-weight: 700; background: rgba(0,0,0,0.45); padding: 1px 5px; white-space: nowrap; }
-.bt-status.is-chip.overcurrent { background: #5b46c4; box-shadow: 0 0 12px rgba(150,120,255,0.7); }
+.bt-status.is-chip.overcurrent { background: #b08a14; box-shadow: 0 0 12px rgba(240,190,40,0.7); }
 .bt-status.is-chip.overvolt { background: #9c7a14; box-shadow: 0 0 12px rgba(255,215,94,0.7); }
 .bt-status.is-chip.water_clone { background: #2f7f9e; }
 .bt-status.is-chip.ems { background: #4a3898; }

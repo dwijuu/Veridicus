@@ -12,7 +12,7 @@ G.bgm = (function () {
   const SRC = 'assets/bgm/afternoon_letters.mp3';
   const OVERLAP = 1.2;   // 다음 반복을 미리 시작하는 시간 (초)
   let enabled = true, volume = 0.5, started = false, cur = 0, timer = 0, want = false;
-  const ROUTES = ['select', 'map'];   // 배경 음악이 나오는 화면 (router 의 화면 이름)
+  const ROUTES = ['select', 'map', 'lesson'];   // 배경 음악이 나오는 화면 (router 의 화면 이름)
   try { enabled = localStorage.getItem('AGENT_GAME_BGM') !== 'off'; } catch (e) {}
   try { const v = parseFloat(localStorage.getItem('AGENT_GAME_BGM_VOL')); if (v >= 0 && v <= 1) volume = v; } catch (e) {}
   const tracks = [new Audio(SRC), new Audio(SRC)];

@@ -83,54 +83,61 @@
   clip-path: polygon(0 6%, 3% 0, 6% 8%, 9% 1%, 100% 0, 97% 30%, 100% 55%, 98% 100%, 5% 100%, 2% 92%, 0 100%, 2% 60%);
 }
 
-/* ── 타로카드 목록 (한 줄 5장 · 아래로 스크롤) ───────── */
+/* ── 타로카드 목록 (한 줄 6장 · 아래로 스크롤 · 테두리가 겹치지 않게 간격) ── */
 .sl-row {
-  position: absolute; left: 0; right: 0; top: 170px; bottom: 0;
-  display: grid; grid-template-columns: repeat(5, 250px); justify-content: center; align-content: start; gap: 34px 40px;
-  padding: 6px 0 60px; overflow-y: auto; overflow-x: hidden;
+  position: absolute; left: 0; right: 0; top: 176px; bottom: 0;
+  display: grid; grid-template-columns: repeat(6, 260px); justify-content: center; align-content: start; gap: 40px 44px;
+  padding: 6px 0 70px; overflow-y: auto; overflow-x: hidden;
 }
 .sl-row::-webkit-scrollbar { width: 6px; }
 .sl-row::-webkit-scrollbar-thumb { background: rgba(44,43,41,0.3); }
-.sl-empty { grid-column: 1 / -1; margin-top: 160px; text-align: center; font-size: 18px; color: var(--ink-2); }
+.sl-empty { grid-column: 1 / -1; margin-top: 160px; text-align: center; font-size: 22px; color: var(--ink-2); }
 
-/* 카드: 크림색 종이 + 펜 선 테두리 (고깔모자의 아틀리에 풍 아르누보 장식) */
-.ph {
-  --ink-c: #3d342b;
-  position: relative; width: 250px; height: 420px; text-align: center;
-  color: var(--ink-c);
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"),
-    #f3eee3;
+/* 카드 (images/card · 600 x 927 비율) */
+.tc { position: relative; display: block; width: 260px; height: 402px; padding: 0; background: none; }
+.tc.is-burning { z-index: 20; }
+.tc > img, .tc-art { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* 배경 모양 그대로 잘라 냄 (배경 그림의 물결 모양 테두리를 따라 만든 다각형)
+ *  · 그림 마스크(mask-image)는 파일을 더블클릭해 열면(file://) 브라우저 보안 때문에 전부 가려지므로 clip-path 를 씀 */
+.tc-art {
+  overflow: hidden;
+  clip-path: polygon(17.83% 3.99%, 15.00% 5.18%, 14.00% 6.26%, 13.83% 13.16%, 11.83% 21.68%, 11.17% 27.72%, 9.50% 35.49%, 9.17% 39.81%, 9.50% 44.66%, 10.83% 49.62%, 10.83% 51.24%, 9.33% 57.50%, 9.33% 63.54%, 9.67% 66.45%, 11.17% 73.14%, 11.83% 79.18%, 13.83% 87.70%, 13.83% 93.85%, 14.17% 94.93%, 16.00% 96.22%, 17.50% 96.76%, 20.17% 97.30%, 23.50% 97.52%, 38.50% 97.84%, 45.17% 97.09%, 51.67% 96.87%, 59.67% 97.73%, 64.17% 97.84%, 66.67% 97.63%, 78.67% 97.41%, 82.33% 96.76%, 83.83% 96.22%, 85.50% 95.15%, 85.83% 94.61%, 86.00% 87.59%, 88.00% 79.07%, 88.67% 73.14%, 90.17% 66.45%, 90.67% 60.63%, 90.17% 55.34%, 89.00% 51.24%, 89.00% 49.62%, 90.50% 43.26%, 90.67% 40.13%, 90.33% 35.60%, 88.67% 27.72%, 87.67% 19.96%, 86.00% 13.27%, 86.00% 7.01%, 85.67% 5.93%, 83.83% 4.64%, 82.00% 3.99%, 77.33% 3.34%, 70.33% 3.34%, 61.17% 3.02%, 53.17% 3.88%, 48.83% 3.99%, 44.33% 3.67%, 40.50% 3.13%, 35.50% 3.02%, 29.50% 3.34%, 22.50% 3.34%);
 }
-.ph:hover { --ink-c: #1f1a15; }
-.ph:hover .ph-name { color: var(--accent); }
-.ph.is-burning { z-index: 20; }
-
-/* 아치 창 — 캐릭터 색 하늘 + 가는 햇살 선 */
-.ph-window {
-  position: absolute; left: 27px; top: 30px; width: 196px; height: 306px; overflow: hidden;
-  border-radius: 98px 98px 0 0;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--char) 45%, #f3eee3) 0%, color-mix(in srgb, var(--char) 22%, #f3eee3) 100%);
+.tc-back { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 캐릭터: 상반신이 창에 차도록 크게 */
+.tc-char { position: absolute; left: -25%; top: 7%; width: 150%; max-width: none; }
+.tc-char.is-ph { left: 18%; top: auto; bottom: 18%; width: 64%; opacity: 0.85; }
+/* 아래에서 올라오는 어두운 그라데이션 — 메인 속성 색이 옅게 섞임 */
+.tc-grad {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 44%;
+  background: linear-gradient(0deg,
+    color-mix(in srgb, var(--el) 30%, #16120f) 0%,
+    color-mix(in srgb, var(--el) 28%, rgba(22, 18, 15, 0.86)) 34%,
+    color-mix(in srgb, var(--el) 20%, rgba(22, 18, 15, 0.4)) 66%,
+    rgba(22, 18, 15, 0) 100%);
 }
-.ph-rays {
-  position: absolute; left: 50%; top: 80%; width: 600px; height: 600px; margin: -300px 0 0 -300px;
-  background: repeating-conic-gradient(from 0deg, rgba(255,250,235,0.55) 0deg 1.2deg, transparent 1.2deg 9deg);
-  -webkit-mask-image: radial-gradient(circle, transparent 18%, #000 30%, transparent 60%);
-          mask-image: radial-gradient(circle, transparent 18%, #000 30%, transparent 60%);
-}
-.ph-window img { position: absolute; left: 50%; top: 4px; height: 400px; transform: translateX(-50%); }
-.ph-window img.is-ph { top: auto; bottom: 0; height: 280px; opacity: 0.85; }
-
-.ph-frame { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--ink-c); pointer-events: none; transition: color 0.15s ease; }
-.ph-ribbon {
-  position: absolute; left: 34px; right: 34px; top: 350px; height: 30px; line-height: 30px;
-  font-family: "Cinzel", serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-c);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.ph-cap { position: absolute; left: 0; right: 0; top: 384px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.ph-name { font-size: 15px; font-weight: 700; color: var(--ink-c); transition: color 0.15s ease; }
-.ph-elems { display: flex; gap: 3px; }
-.ph-elems i { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--el); }
-.ph-elems .g-icon { width: 15px; height: 15px; }
+.tc-cap { position: absolute; left: 0; right: 0; bottom: 11%; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #fbf8f2; }
+.tc-stars { display: flex; gap: 3px; }
+.tc-stars svg { width: 21px; height: 21px; fill: currentColor; }
+.tc-name { font-size: 28px; font-weight: 900; letter-spacing: 0.04em; line-height: 1; }
+.tc:hover .tc-name, .tc:hover .tc-stars { color: #f2c9a4; }
 
 .ph-burn { position: absolute; inset: 0; z-index: 5; width: 100%; height: 100%; pointer-events: none; }
+
+/* ── 버튼 크기 (휴대폰 고려) ── */
+.sl-top { top: 28px; }
+.sl-back { gap: 14px; }
+.sl-back svg { width: 40px; height: 40px; }
+.sl-back b { font-size: 38px; }
+.sl-tools { gap: 34px; }
+.sl-search { width: 300px; gap: 12px; padding: 10px 2px; }
+.sl-search svg { width: 26px; height: 26px; }
+.sl-search input { font-size: 23px; }
+.sl-elems { gap: 6px; }
+.sl-elem { width: 54px; height: 54px; border-radius: 6px; }
+.sl-elem .g-icon { width: 30px; height: 30px; }
+.sl-sorts button { padding: 10px 18px; font-size: 23px; }
+.sl-sorts button.is-on::after { left: 18px; right: 18px; height: 3px; }
+.sl-ico { width: 66px; height: 66px; }
+.sl-ico svg { width: 40px; height: 40px; }
+.sl-count { top: 118px; font-size: 28px; }

@@ -1,0 +1,78 @@
+/* ==============================================================================
+   보충 수업 (#/lesson) — 캐릭터 정보 화면처럼 왼쪽 어두운 면(주간 토벌) · 오른쪽 밝은 면(일간 토벌)
+   · 테두리 · 그라데이션 · 그림자 · 호버 움직임 없음 (호버는 색만)
+   ============================================================================== */
+.ls-screen { background: #1d1b19; color: var(--rs-on-dark); font-family: var(--rs-sans); overflow: hidden; }
+.ls-dark { position: absolute; left: 0; top: 0; bottom: 0; width: 1010px; background: #1d1b19 var(--rs-black-img) center / cover; }
+.ls-paper { position: absolute; left: 1010px; right: 0; top: 0; bottom: 0; background: var(--rs-paper) var(--rs-white-img) center / cover; }
+
+.ls-top .g-badge { color: var(--rs-on-dark); font-size: 24px; }
+.ls-top .g-badge .num { color: var(--rs-on-dark-3); font-size: 18px; }
+.ls-top .ls-set { margin-left: auto; color: var(--rs-ink); }
+.ls-top .ls-set:hover { color: var(--rs-accent); }
+
+/* 보스 그림 (어두운 면 오른쪽) */
+.ls-boss { position: absolute; left: 520px; bottom: 0; width: 490px; height: 700px; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
+.ls-boss img { max-width: 100%; max-height: 100%; object-fit: contain; object-position: bottom; }
+.ls-boss-sil { display: block; width: 440px; height: 600px; opacity: 0.92; }
+.ls-boss-sil svg { width: 100%; height: 100%; }
+
+.ls-weekly { position: absolute; left: 96px; top: 150px; width: 560px; }
+.ls-daily { position: absolute; left: 1110px; top: 150px; width: 720px; color: var(--rs-ink); }
+
+.ls-eyebrow { font-family: "Cinzel", serif; font-weight: 700; font-size: 26px; letter-spacing: 0.16em; }
+.ls-eyebrow span { margin-left: 12px; font-family: var(--rs-sans); font-size: 20px; letter-spacing: 0.04em; font-weight: 500; opacity: 0.7; }
+
+.ls-timer { margin-top: 14px; display: flex; align-items: center; gap: 10px; font-size: 20px; color: var(--rs-on-dark-2); }
+.ls-timer svg { width: 26px; height: 26px; }
+.ls-timer b { font-family: "Cormorant Garamond", serif; font-size: 34px; font-weight: 600; letter-spacing: 0.04em; color: var(--rs-on-dark); font-variant-numeric: tabular-nums; }
+.ls-timer small { margin-left: 6px; font-size: 16px; color: var(--rs-on-dark-3); }
+.ls-daily .ls-timer { color: var(--rs-ink-2); }
+.ls-daily .ls-timer b { color: var(--rs-ink); }
+.ls-daily .ls-timer small { color: var(--rs-ink-3); }
+
+.ls-name { margin: 34px 0 0; font-size: 60px; font-weight: 900; line-height: 1.1; letter-spacing: -0.01em; }
+.ls-en { margin-top: 6px; font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 28px; color: var(--rs-on-dark-2); }
+.ls-daily .ls-en { color: var(--rs-ink-3); }
+
+.ls-tags { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.ls-tags span { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 20px; font-size: 19px; font-weight: 700; background: rgba(247, 244, 238, 0.1); color: var(--rs-on-dark); }
+.ls-tags span .g-icon, .ls-tags span svg { width: 20px; height: 20px; color: var(--el, currentColor); }
+.ls-tags .is-boss { background: var(--rs-accent); font-family: "Cinzel", serif; letter-spacing: 0.14em; }
+
+.ls-desc { margin: 22px 0 0; font-size: 21px; line-height: 1.65; color: var(--rs-on-dark-2); word-break: keep-all; }
+.ls-daily .ls-desc { color: var(--rs-ink-2); }
+
+.ls-debuff { margin-top: 26px; display: flex; gap: 16px; align-items: center; padding: 18px 22px; border-radius: 8px; background: rgba(247, 244, 238, 0.08); }
+.ls-debuff > svg { flex: none; width: 36px; height: 36px; color: var(--rs-hover-light); }
+.ls-debuff b { display: block; font-size: 22px; }
+.ls-debuff span { display: block; margin-top: 4px; font-size: 18px; color: var(--rs-on-dark-2); word-break: keep-all; }
+
+.ls-act { margin-top: 34px; display: flex; align-items: center; gap: 24px; }
+.ls-state { font-size: 20px; color: var(--rs-on-dark-2); }
+.ls-go { height: 78px; min-width: 300px; padding: 0 40px; font-size: 28px; border-radius: 6px; }
+.ls-weekly .ls-go { background: var(--rs-paper); color: var(--rs-ink); }
+.ls-weekly .ls-go:hover:not(:disabled) { background: #fff; color: var(--rs-accent); }
+.ls-daily .ls-go { background: var(--rs-ink); color: var(--rs-on-dark); }
+.ls-daily .ls-go:hover:not(:disabled) { background: var(--rs-accent); color: #fff; }
+.ls-go:disabled { background: rgba(127, 122, 114, 0.35) !important; color: rgba(247, 244, 238, 0.7) !important; cursor: default; }
+.ls-daily .ls-go:disabled { background: var(--rs-paper-2) !important; color: var(--rs-ink-3) !important; }
+
+/* 일간: 상대 · 남은 횟수 */
+.ls-foes { margin-top: 26px; display: flex; gap: 14px; }
+.ls-foe { display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 10px; border-radius: 8px; background: rgba(43, 41, 37, 0.07); }
+.ls-foe-art { width: 64px; height: 64px; display: block; }
+.ls-foe-art svg { width: 100%; height: 100%; }
+.ls-foe b { font-size: 20px; }
+.ls-foe small { font-size: 18px; color: var(--rs-ink-3); }
+.ls-count { margin-top: 30px; display: flex; align-items: center; gap: 16px; font-size: 20px; color: var(--rs-ink-2); }
+.ls-count b { font-family: "Cormorant Garamond", serif; font-size: 44px; font-weight: 600; color: var(--rs-ink); line-height: 1; }
+.ls-count b small { font-size: 26px; color: var(--rs-ink-3); }
+.ls-pips { display: inline-flex; gap: 12px; margin-left: 6px; }
+.ls-pips i { width: 20px; height: 20px; transform: rotate(45deg); background: rgba(43, 41, 37, 0.14); }
+.ls-pips i.is-on { background: var(--rs-accent); }
+.ls-daily .ls-act { margin-top: 30px; }
+
+/* ── 공통: 메인 화면(로비)으로 바로 가는 ◎ 버튼 ── */
+.g-topbar .g-home { margin-left: -6px; }
+.g-home .g-icon { width: 34px !important; height: 34px !important; }

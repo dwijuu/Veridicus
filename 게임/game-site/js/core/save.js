@@ -8,6 +8,7 @@
  *    team:    ['Character_05', null, null, null],  마지막 편성 (자유 편성 스테이지용)
  *    settings: { speed: 1 | 2, auto: false },
  *    decks:   [{ name: '덱 1', team: [id|null x4] }, ...]   미리 만들어 둔 덱 (최대 10개)
+ *    contract: 'Character_05'   체레스테 [진실과 거짓의 계약] 계약자 (편성 화면에서 지정)
  *  }
  * · 저장 데이터가 손상되었거나 버전이 다르면 안전하게 초기값으로 되돌립니다.
  * · 저장소 접근이 막힌 환경(시크릿 모드 등)에서도 메모리 상태로 계속 플레이할 수 있습니다.
@@ -54,6 +55,7 @@ G.save = (function () {
         return { name: (typeof k.name === 'string' && k.name.trim() ? k.name.trim().slice(0, 20) : '덱 ' + (i + 1)), team: cleanTeam(k.team) };
       });
     }
+    if (typeof raw.contract === 'string' && G.DATA.characters[raw.contract]) d.contract = raw.contract;
     if (raw.settings) {
       d.settings.speed = raw.settings.speed === 2 ? 2 : 1;
       d.settings.auto = raw.settings.auto === true;
@@ -93,6 +95,7 @@ G.save = (function () {
   /* 스테이지 해금 여부: 챕터가 열려 있고, 선행 스테이지가 클리어되어야 함 */
   function isStageUnlocked(stageId) {
     const st = G.DATA.stages[stageId];
+    if (st && st.lesson) return !!G.lesson && G.lesson.canEnter(st.lesson);   // 보충 수업: 남은 횟수가 있을 때만
     if (!st || !isChapterUnlocked(st.chapter)) return false;
     return !st.requires || isCleared(st.requires);
   }
@@ -103,6 +106,8 @@ G.save = (function () {
   function setSetting(k, v) { data.settings[k] = v; persist(); }
   function getDecks() { return data.decks.map(function (k) { return { name: k.name, team: k.team.slice() }; }); }
   function setDecks(list) { data.decks = list.slice(0, MAX_DECKS).map(function (k, i) { return { name: (k.name || '덱 ' + (i + 1)).slice(0, 20), team: cleanTeam(k.team) }; }); persist(); }
+  function getContract() { return data.contract || null; }
+  function setContract(id) { data.contract = id || null; persist(); }
   function reset() { data = fresh(); persist(); }
 
   /* 기록 내보내기 / 불러오기 (다른 브라우저 · 기기로 옮길 때)
@@ -130,5 +135,5 @@ G.save = (function () {
   }
   function clearedCount() { return Object.keys(data.cleared).filter(function (k) { return k.indexOf(':') === -1; }).length; }
 
-  return { MAX_DECKS, getDecks, setDecks, exportData, importData, clearedCount, load, isCleared, markCleared, isStageUnlocked, isChapterUnlocked, getTeam, setTeam, getSettings, setSetting, reset };
+  return { MAX_DECKS, getDecks, setDecks, exportData, importData, clearedCount, load, isCleared, markCleared, isStageUnlocked, isChapterUnlocked, getTeam, setTeam, getContract, setContract, getSettings, setSetting, reset };
 })();

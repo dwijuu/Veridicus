@@ -12,7 +12,7 @@
 window.G = window.G || {};
 
 G.sync = (function () {
-  const KEYS = ['AGENT_GAME_SAVE', 'AGENT_GAME_BGM', 'AGENT_GAME_BGM_VOL', 'AGENT_GAME_SFX', 'AGENT_GAME_SFX_VOL', 'AGENT_MAIN_BGM'];   // 마지막: 메인화면 축음기에서 고른 곡
+  const KEYS = ['AGENT_GAME_SAVE', 'AGENT_GAME_BGM', 'AGENT_GAME_BGM_VOL', 'AGENT_GAME_SFX', 'AGENT_GAME_SFX_VOL', 'AGENT_MAIN_BGM', 'AGENT_GAME_LESSON'];   // 메인화면 축음기에서 고른 곡 · 보충 수업 횟수
 
   function enc(str) { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function dec(str) {

@@ -1,0 +1,242 @@
+/* ==============================================================================
+   전투 화면 — 메인 화면 컨셉 (마지막에 덮어씀)
+   · 팝업 · 버튼 · 아이콘: 의미 없는 테두리 · 그림자 · 광택 · 그라데이션 없이 평평한 판
+   · 스킬 이펙트: 번짐(글로우) 없이 또렷한 평면 도형 + 타격 순간의 사선 컷 (리버스 1999 풍)
+   · 보충 수업(주간 · 일간 토벌)도 같은 전투 화면을 쓰므로 함께 바뀜
+   ============================================================================== */
+
+/* ── 스킬 사용 팝업 (머리 위 스킬 이름) ── */
+.bt-screen .bt-callout {
+  background: rgba(22, 20, 18, 0.9) !important; border: 0 !important; box-shadow: none !important; border-radius: 4px;
+  padding: 8px 18px !important; font-family: var(--rs-sans) !important; font-size: 24px !important; font-weight: 700; color: #fff !important;
+}
+.bt-screen .bt-callout.is-enemy { background: rgba(132, 46, 32, 0.94) !important; color: #fff !important; }
+
+/* ── 적이 이번 턴에 쓸 스킬 (머리 위 예고) ── */
+.bt-screen .bt-intent {
+  background: rgba(22, 20, 18, 0.86) !important; border: 0 !important; box-shadow: none !important; border-radius: 4px;
+  height: 30px !important; padding: 0 12px !important; gap: 8px; font-family: var(--rs-sans) !important; font-size: 16px !important; font-weight: 700; color: #f0b9a5 !important;
+}
+.bt-screen .bt-intent::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e0714f; font-size: 0; }
+.bt-screen .bt-intent.is-ult { background: #b5562f !important; color: #fff !important; }
+.bt-screen .bt-intent.is-ult::before { background: #fff; }
+.bt-screen .bt-intent.is-sealed { background: rgba(70, 68, 76, 0.9) !important; color: #d8d4cc !important; }
+.bt-screen .bt-intent.is-sealed::before { content: ""; background: #d8d4cc; }
+
+/* ── 시전 중인 카드 (왼쪽 위) · 행동 슬롯 ── */
+.bt-castcard .bt-card-frame { filter: none !important; animation: none !important; }
+.bt-castcard-cap { background: rgba(22, 20, 18, 0.9) !important; border: 0 !important; border-radius: 4px; padding: 3px 12px !important; }
+.bt-castcard-cap .tag { font-family: "Cinzel", serif !important; color: #b3aba1 !important; }
+.bt-castcard-cap b { font-family: var(--rs-sans) !important; color: #fff !important; }
+.bt-slot { background: rgba(20, 18, 16, 0.45) !important; border: 0 !important; box-shadow: none !important; border-radius: 4px; }
+.bt-slot.is-running { background: rgba(242, 201, 164, 0.28) !important; }
+.bt-slot.is-locked { background: rgba(60, 58, 54, 0.4) !important; }
+.bt-slot.is-commit::after { border: 0 !important; background: rgba(255, 255, 255, 0.22); }
+.bt-slot.is-filled .bt-card, .bt-slot .bt-card { box-shadow: none !important; }
+.bt-slot-n { font-family: "Cormorant Garamond", serif !important; font-weight: 700; color: rgba(247, 244, 238, 0.7) !important; }
+
+/* ── 카드 · 대기석 · 셔플 ── */
+.bt-card { border: 0 !important; box-shadow: none !important; }
+.bt-card-frame { filter: none !important; }
+.bt-bench-card { border: 0 !important; box-shadow: none !important; border-radius: 6px; transform: none !important; transition: none !important; }
+.bt-bench-card.can-swap:hover { box-shadow: none !important; transform: none !important; }
+.bt-bench-card .lab { background: rgba(22, 20, 18, 0.85) !important; border-radius: 0 0 6px 0; }
+.bt-bench-card .nm { text-shadow: none !important; }
+.bt-shuffle-btn { background: rgba(22, 20, 18, 0.72) !important; border: 0 !important; box-shadow: none !important; border-radius: 6px; color: #f7f4ee !important; transition: none !important; }
+.bt-shuffle-btn:hover:not(:disabled) { transform: none !important; box-shadow: none !important; color: #f2c9a4 !important; }
+.bt-shuffle-btn .ico { border: 0 !important; background: rgba(247, 244, 238, 0.12) !important; transform: none !important; border-radius: 50%; }
+.bt-shuffle-btn .ico .g-icon { transform: none !important; }
+.bt-shuffle-btn b { color: #f2c9a4 !important; }
+.bt-swap-btn { background: rgba(22, 20, 18, 0.72) !important; border: 0 !important; box-shadow: none !important; }
+.bt-swap-ico { background: #f7f4ee !important; transform: none !important; border-radius: 50%; }
+.bt-swap-item { border: 0 !important; border-radius: 6px; }
+.bt-swap-item:hover { outline: 3px solid #f2c9a4; outline-offset: -3px; }
+
+/* ── 머리 위 체력 · 마력 · 열의 · 상태 아이콘 ── */
+.bt-screen .bt-hp, .bt-screen .bt-mp { border: 0 !important; box-shadow: none !important; background: rgba(0, 0, 0, 0.55) !important; border-radius: 2px; }
+.bt-moxie span { border: 0 !important; box-shadow: none !important; background: rgba(247, 244, 238, 0.28) !important; }
+.bt-moxie span.on { background: #f2c9a4 !important; }
+.bt-moxie.is-enemy span.on { background: #e0714f !important; }
+.bt-status { border: 0 !important; box-shadow: none !important; border-radius: 5px; }
+.bt-status.buff { background: #3f7d74 !important; }
+.bt-status.debuff { background: #a8442f !important; }
+.bt-status.is-key { box-shadow: none !important; outline: 2px solid #f2c9a4; outline-offset: 1px; }
+.bt-status i { border: 0 !important; background: rgba(22, 20, 18, 0.92) !important; border-radius: 3px; }
+
+/* ── 보스 체력 바 · 필드 효과 · 증원 수 ── */
+.bt-bossbar-hp { border: 0 !important; box-shadow: none !important; background: rgba(22, 20, 18, 0.85) !important; border-radius: 3px; }
+.bt-bossbar-hp .fill { background: #c0503a !important; }
+.bt-bossbar-name { text-shadow: none !important; color: #f7f4ee !important; font-family: var(--rs-sans); font-weight: 700; }
+.bt-bossbar-name .tag { border: 0 !important; background: #b5562f !important; border-radius: 3px; }
+.bt-field-chip, .bt-wave { border: 0 !important; box-shadow: none !important; background: rgba(22, 20, 18, 0.8) !important; border-radius: 4px; color: #f2c9a4 !important; }
+
+/* ── 턴 배너 · 안내 · 결과 · 메뉴 ── */
+.bt-banner { background: rgba(22, 20, 18, 0.82) !important; border: 0 !important; box-shadow: none !important; color: #f7f4ee !important; font-family: "Cinzel", serif !important; }
+.bt-banner.is-enemy { background: rgba(132, 46, 32, 0.9) !important; color: #fff !important; }
+.bt-toast { background: rgba(22, 20, 18, 0.92) !important; border: 0 !important; box-shadow: none !important; border-radius: 4px; font-family: var(--rs-sans) !important; }
+.bt-result { background: rgba(14, 12, 10, 0.86) !important; }
+.bt-result-big { text-shadow: none !important; color: #f7f4ee !important; font-family: "Cinzel", serif !important; }
+.bt-result.is-lose .bt-result-big { color: #e0937c !important; }
+.bt-result-sub { font-family: var(--rs-sans) !important; }
+.bt-result-sub::after { content: none !important; }
+.bt-modal-box { border: 0 !important; box-shadow: none !important; }
+.bt-info-tab { border: 0 !important; border-radius: 4px; }
+
+/* ── 숫자 (피해 · 회복) — 또렷한 세리프 숫자, 번짐 없이 얇은 먹색 외곽선만 (밝은 배경에서도 읽히게) ── */
+.bt-screen .bt-float {
+  text-shadow: none !important; font-family: "Cormorant Garamond", serif !important; font-weight: 700; font-style: italic;
+  -webkit-text-stroke: 5px rgba(22, 18, 14, 0.9); paint-order: stroke fill;
+}
+.bt-screen .bt-float.is-status, .bt-screen .bt-float.is-mp, .bt-screen .bt-float.is-hpcost, .bt-screen .bt-float.is-shield, .bt-screen .bt-float.is-hold, .bt-screen .bt-float.is-link {
+  font-family: var(--rs-sans) !important; font-style: normal; -webkit-text-stroke: 4px rgba(22, 18, 14, 0.9);
+}
+.bt-screen .bt-float.is-crit::before { font-family: "Cinzel", serif; -webkit-text-stroke: 3px rgba(22, 18, 14, 0.9); }
+.bt-screen .bt-float.is-zap { color: #f2cc4a !important; }
+
+/* ==============================================================================
+   스킬 이펙트 — 번짐 · 그림자 없이 평평한 도형
+   ============================================================================== */
+.bt-fx .fx, .bt-fx .fx *, .bt-cine .fx, .bt-cine .fx * { box-shadow: none !important; text-shadow: none !important; }
+.fx-svg { filter: none !important; }
+.fx-rock, .fx-vine, .fx-eye, .fx-tree, .fx-ghost, .fx-hex polygon, .fx-hex.is-green polygon { filter: none !important; }
+.fx-dust { filter: none !important; background: rgba(170, 140, 100, 0.4) !important; }
+.fx-burst { border-width: 8px !important; }
+.fx-burst.is-muzzle { background: #fff7e0 !important; }
+.fx-bullet { background: #fff3d6 !important; }
+.fx-flame { background: #f07a2a !important; }
+.fx-meteor-core { background: #fff1d0 !important; }
+.fx-meteor-tail { filter: none !important; background: #f08a3a !important; clip-path: polygon(0 50%, 100% 0, 100% 100%); border-radius: 0 !important; }
+.fx-claw { background: #d84a34 !important; }
+.fx-tide { background: rgba(90, 160, 210, 0.5) !important; }
+.fx-beam { background: rgba(255, 244, 210, 0.85) !important; }
+.fx-volt-orb { background: #fff6cf !important; border: 10px solid #e8b82c; }
+.fx-volt-beam { background: #fff6cf !important; border-top: 18px solid #e8b82c; border-bottom: 18px solid #e8b82c; }
+.fx-spark.is-volt { background: #ffe27a !important; }
+.fx-plug { background: rgba(232, 184, 44, 0.3) !important; }
+.fx-cloud { background: rgba(40, 36, 30, 0.92) !important; }
+.fx-dragon-body { background: rgba(140, 205, 240, 0.9) !important; }
+.fx-dragon-head { background: #dff4ff !important; }
+.fx-gwell { background: #12142a !important; border: 10px solid #8d9be0; }
+.fx-dome { background: rgba(130, 150, 255, 0.12) !important; }
+.fx-vinelink { background: #8fd29a !important; }
+
+/* 타격 순간: 대상을 가로지르는 사선 컷 2줄 (battle-ui.js hit() → .bt-slash) */
+.bt-slash { position: absolute; z-index: 58; height: 8px; width: 420px; margin: -4px 0 0 -210px; pointer-events: none; background: #fffaf0; transform-origin: 50% 50%; }
+.bt-slash::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 3px; background: var(--slash, #b5562f); }
+
+/* ==============================================================================
+   궁극기 컷인 — 종이(아군) / 먹(적) 바탕 위로 속성 색 사선 판 · 캐릭터 · 큰 스킬 이름 (battle-ui.js ultCinematic)
+   ============================================================================== */
+.ut { position: absolute; inset: 0; z-index: 80; overflow: hidden; pointer-events: auto; --ut: #b5562f; }
+.ut-base { position: absolute; inset: 0; background: #efe9df var(--rs-white-img) center / cover; }
+.ut.is-enemy .ut-base { background: #161412 var(--rs-black-img) center / cover; }
+.ut-slab { position: absolute; top: -10%; bottom: -10%; left: 46%; width: 70%; background: var(--ut); transform: skewX(-14deg); transform-origin: 50% 50%; }
+.ut.is-enemy .ut-slab { left: auto; right: 46%; transform: skewX(14deg); }
+.ut-slab2 { position: absolute; top: -10%; bottom: -10%; left: 41%; width: 3.2%; background: #2b2925; transform: skewX(-14deg); }
+.ut.is-enemy .ut-slab2 { left: auto; right: 41%; background: #efe9df; transform: skewX(14deg); }
+.ut-art { position: absolute; right: 2%; bottom: -46%; height: 150%; display: flex; align-items: flex-end; justify-content: center; }
+.ut-art img { height: 100%; width: auto; max-width: none; }
+.ut-art svg { height: 100%; width: auto; }
+.ut.is-enemy .ut-art { right: auto; left: 2%; }
+.ut-lines { position: absolute; inset: 0; pointer-events: none; }
+.ut-lines i { position: absolute; left: -10%; width: 120%; height: 4px; background: #2b2925; }
+.ut.is-enemy .ut-lines i { background: #efe9df; }
+.ut-text { position: absolute; left: 110px; bottom: 150px; max-width: 980px; color: #2b2925; }
+.ut.is-enemy .ut-text { left: auto; right: 110px; text-align: right; color: #f7f4ee; }
+.ut-eyebrow { font: 700 26px "Cinzel", serif; letter-spacing: 0.4em; color: var(--ut); }
+.ut.is-enemy .ut-eyebrow { color: #e0714f; }
+.ut-name { margin-top: 12px; font: 900 108px/1.05 "Noto Serif KR", serif; letter-spacing: -0.01em; word-break: keep-all; }
+.ut-en { margin-top: 10px; font: italic 600 44px "Cormorant Garamond", serif; color: rgba(43, 41, 37, 0.75); }
+.ut.is-enemy .ut-en { color: rgba(247, 244, 238, 0.72); }
+.ut-rule { height: 4px; width: 520px; margin-top: 22px; background: #2b2925; transform-origin: 0 50%; }
+.ut.is-enemy .ut-rule { background: #efe9df; margin-left: auto; transform-origin: 100% 50%; }
+.ut-who { margin-top: 16px; font: 700 28px var(--rs-sans); letter-spacing: 0.08em; }
+.ut-wipe { position: absolute; inset: 0; background: #161412; transform: scaleX(0); transform-origin: 0 50%; }
+.ut.is-enemy .ut-wipe { background: #efe9df; transform-origin: 100% 50%; }
+
+/* 마법(손패) 아래 받침: 테두리 · 그림자 없이 옅은 판 */
+.bt-hand-tray { border: 0 !important; box-shadow: none !important; background: rgba(14, 12, 10, 0.45) !important; }
+.bt-hand-tray::before, .bt-hand-tray::after { content: none !important; }
+
+/* ══ v1.5 · 머리 위 체력 · 마력 (리버스 1999 · 명조 느낌: 가는 바 · 비스듬한 끝 · 단색) ══ */
+.bt-screen .bt-hp-wrap { background: none !important; border: 0 !important; box-shadow: none !important; padding: 2px 0 !important; gap: 4px !important; align-items: center; }
+.bt-screen .bt-hp { width: 158px !important; height: 7px !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important;
+  background: rgba(16, 14, 18, 0.62) !important; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
+.bt-screen .bt-hp::after { display: none !important; }
+.bt-screen .bt-hp-fill { background: #ece6da !important; }
+.bt-screen .bt-hp-lag { background: #b5562f !important; }
+.bt-screen .bt-hp-shield { background: #d8b45c !important; }
+.bt-screen .bt-unit.is-enemy .bt-hp-fill { background: #c9503a !important; }
+.bt-screen .bt-unit.is-enemy .bt-hp-lag { background: #f2dcc0 !important; }
+.bt-screen .bt-unit.is-boss .bt-hp { width: 240px !important; }
+.bt-screen .bt-mp-row { gap: 0 !important; }
+.bt-screen .bt-mp-ico { display: none !important; }
+.bt-screen .bt-mp { width: 124px !important; height: 3px !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important;
+  background: rgba(16, 14, 18, 0.62) !important; clip-path: polygon(2px 0, 100% 0, calc(100% - 2px) 100%, 0 100%); }
+.bt-screen .bt-mp-fill { background: #8fb4e6 !important; }
+.bt-screen .bt-moxie { gap: 6px !important; height: 8px !important; margin-top: 1px; }
+.bt-screen .bt-moxie span { width: 6px !important; height: 6px !important; background: rgba(236, 230, 218, 0.3) !important; }
+.bt-screen .bt-moxie span.on { background: #f2c9a4 !important; }
+.bt-screen .bt-moxie.is-enemy span.on { background: #e0714f !important; }
+.bt-screen .bt-status { border-radius: 2px !important; }
+.bt-screen .bt-status i { border-radius: 0 !important; }
+.bt-bench-card .hp, .bt-bench-card .mp { border-radius: 0; }
+.bt-bench-card .hp b { background: #ece6da !important; }
+.bt-bench-card .mp b { background: #8fb4e6 !important; }
+
+/* ══ v1.5 · [번개] 스택: 먹색 마름모 판 + 노란 번개 · 숫자는 아래 (라벨 없음) ══ */
+.bt-screen .bt-bolt { width: 84px; gap: 2px; right: 40px; top: 300px; }
+.bt-screen .bt-bolt-ico { width: 64px !important; height: 64px !important; filter: none !important; }
+.bt-bolt-mark { width: 64px; height: 64px; display: block; }
+.bt-bolt-mark .bd { fill: rgba(22, 20, 24, 0.86); }
+.bt-bolt-mark .bl { fill: #e8b82c; }
+.bt-bolt.is-hot .bt-bolt-mark .bd { fill: #2a2416; }
+.bt-bolt.is-hot .bt-bolt-mark .bl { fill: #ffd65a; }
+.bt-screen .bt-bolt-n { position: static !important; transform: none !important; display: block; text-align: center;
+  font-family: "Cormorant Garamond", serif !important; font-style: italic; font-weight: 700; font-size: 34px !important; line-height: 1;
+  color: #f7f1e4 !important; text-shadow: none !important; -webkit-text-stroke: 5px rgba(22, 20, 24, 0.9); paint-order: stroke fill; }
+.bt-bolt-lab { display: none !important; }
+.bt-screen .bt-bolt-delta { top: 20px; text-shadow: none !important; color: #ffd65a; font-family: var(--rs-sans); -webkit-text-stroke: 4px rgba(22, 20, 24, 0.9); paint-order: stroke fill; }
+.bt-screen .bt-bolt-delta.is-neg { color: #f2a08c; }
+@keyframes btBoltPulse { 0% { transform: scale(1); } 35% { transform: scale(1.14); } 100% { transform: scale(1); } }
+@keyframes btBoltDrain { 0% { transform: scale(1); } 35% { transform: scale(0.86); opacity: 0.6; } 100% { transform: scale(1); } }
+
+/* ══ v1.5 · 체레스테 연출: 마름모 표식 · 사선 컷 ══ */
+.fx-mark { position: absolute; width: 74px; height: 74px; border: 3px solid #efe8dc; background: none; pointer-events: none; }
+.fx-cut { position: absolute; width: 200px; height: 4px; pointer-events: none; transform-origin: 50% 50%; }
+
+/* ══ v1.5 · 아군 스킬 창: 패시브 · 특성 ══ */
+.bt-info-ps-h { grid-column: 1 / -1; margin-top: 4px; font-family: var(--rs-sans); font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: #f2c9a4; }
+.bt-info-ps { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 16px; }
+.bt-info-p { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; padding: 10px 12px; background: rgba(247, 241, 228, 0.06); }
+.bt-info-p .ico { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: rgba(247, 241, 228, 0.1); color: #f2c9a4; }
+.bt-info-p .ico .g-icon { width: 20px; height: 20px; }
+.bt-info-p.is-gold .ico { background: #b8922a; color: #fff8e6; }
+.bt-info-p.is-black .ico { background: #2c2a36; color: #e7e1f2; }
+.bt-info-p b { display: block; font-size: 16px; color: #f7f1e4; margin-bottom: 2px; }
+.bt-info-p p { font-size: 13px; line-height: 1.45; color: rgba(241, 230, 207, 0.8); word-break: keep-all; }
+.bt-modal-box.bt-info { max-height: 880px; }
+
+/* ══ v1.5 · 전투 시작: 체레스테 계약자 선택 ══ */
+.bt-contract { position: absolute; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: rgba(16, 14, 18, 0.62); }
+.bt-contract-box { width: 1040px; padding: 44px 56px 48px; background: #efe8dc url("../../배경/화이트.png") center / cover; color: #2b2120; text-align: center; }
+.bt-contract-eyebrow { font-family: var(--rs-sans); font-size: 15px; font-weight: 700; letter-spacing: 0.24em; color: #b5562f; }
+.bt-contract-title { margin-top: 10px; font-family: var(--rs-sans); font-size: 40px; font-weight: 900; }
+.bt-contract-desc { margin: 12px auto 0; max-width: 760px; font-family: var(--rs-sans); font-size: 18px; line-height: 1.55; color: rgba(43, 33, 32, 0.75); word-break: keep-all; }
+.bt-contract-row { display: flex; justify-content: center; gap: 22px; margin-top: 34px; }
+.bt-contract-pick { width: 180px; padding: 0 0 16px; border: 0; background: #2b2120; color: #f7f1e4; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bt-contract-pick .pic { width: 180px; height: 180px; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; background: var(--card-color, #4a4048); }
+.bt-contract-pick .pic img { height: 230%; margin-top: 4px; }
+.bt-contract-pick .pic img:not(.is-sprite) { height: 200%; margin-top: -6px; }
+.bt-contract-pick b { margin-top: 12px; font-family: var(--rs-sans); font-size: 24px; font-weight: 900; }
+.bt-contract-pick small { font-family: var(--rs-sans); font-size: 14px; letter-spacing: 0.1em; color: rgba(247, 241, 228, 0.6); }
+.bt-contract-pick.is-last small { color: #f2c9a4; }
+.bt-contract-pick:hover { background: #b5562f; }
+.bt-contract-pick:hover small { color: #f7f1e4; }
+
+/* ══ v1.5 · 적 정보: 스테이지 · 목표 글씨는 누를 수 없고, [적 정보] 부분만 버튼 ══ */
+.bt-intel-row { gap: 18px; cursor: default; color: var(--txt-dim); }
+.bt-intel-stage { pointer-events: none; }
+.bt-screen .bt-intel-ico { height: 100%; padding: 0 14px; margin-left: -4px; border: 0; border-left: 1px solid rgba(255, 255, 255, 0.2); background: none; font-family: inherit; cursor: pointer; color: var(--rs-on-dark, #f7f1e4) !important; }
+.bt-screen .bt-intel-ico:hover { color: #f2c9a4 !important; }
+.bt-screen .bt-intel-ico:focus, .bt-screen .bt-intel-ico:focus-visible { outline: none; }

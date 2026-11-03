@@ -62,7 +62,7 @@ G.DATA.enemies = {
           { do: 'status', to: 'hit', status: 'drip', turns: 3 }
         ] },
       { id: 'mb_clone', name: '물의 분신 회피', type: 'buff', element: 'water', anim: 'mb_clone',
-        desc: '물의 마법으로 자신의 분신을 생성해 공격을 기만합니다. 1턴 동안 [공격 회피] 상태가 되어 단일/범위 공격을 1회 무효화합니다.',
+        desc: '물의 마법으로 자신의 분신을 생성해 공격을 기만합니다. [공격 회피] 상태가 되어 다음 공격 1회(연타 · 추가 공격 포함)를 무효화합니다.',
         actions: [{ do: 'status', to: 'self', status: 'water_clone', turns: 2 }] },
       { id: 'mb_blessing', name: '자연의 축복수', type: 'buff', element: 'nature', anim: 'mb_blessing',
         desc: '물과 자연의 생명력을 결합해 2턴간 자신 진영 전체의 공격력을 20% 증가시키고, 체력을 자신 공격력의 100%만큼 즉시 회복합니다.',
@@ -169,4 +169,42 @@ G.DATA.enemies = {
         actions: [{ do: 'damage', target: 'single', power: 1.1 }] }
     ]
   };
+})();
+
+/* ── 보충 수업 (2026.11) ─────────────────────────────────────
+ *  주간 토벌: 블랙 속성의 강한 보스만 등장 · 스토리보다 강화 · 매주 일요일 12시에 보스가 바뀜 (js/core/lesson.js 의 순서)
+ *    · lesson_corusco : 코루스코 (STAGE 09 보스) — 연출된 결말 없이 끝까지 싸움
+ *    · lesson_tide    : 검은 해일 — 지도교수 샤머(중간 보스)의 기술을 쓰는 블랙
+ *    · lesson_warden  : 그림자 감독관 — 교사의 기술을 쓰는 블랙
+ *  일간 토벌: 비교적 쉬운 적 (스토리에 나온 적을 그대로 사용)
+ *  ⚠ 체력 · 공격력 · 방어력은 밸런스를 위해 정한 임시 값 (자동 전투 시뮬레이션으로 '깰 수는 있는' 수준에 맞춤)
+ */
+(function () {
+  const clone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  const E = G.DATA.enemies;
+
+  const co = clone(E.corusco_boss);
+  co.id = 'lesson_corusco';
+  delete co.finaleSkill;
+  co.combat = { hp: 7200, atk: 84, def: 50, crit: 0.1 };
+  E.lesson_corusco = co;
+
+  const td = clone(E.midboss);
+  td.id = 'lesson_tide';
+  td.name = '검은 해일';
+  td.subElement = 'black';
+  td.tint = '#1e2430';
+  td.role = '블랙 · 물/자연 속성';
+  td.combat = { hp: 9000, atk: 96, def: 52, crit: 0.08 };
+  E.lesson_tide = td;
+
+  const wd = clone(E.teacher);
+  wd.id = 'lesson_warden';
+  wd.name = '그림자 감독관';
+  wd.boss = true;
+  wd.element = 'black';
+  wd.tint = '#1b1a22';
+  wd.role = '블랙';
+  wd.combat = { hp: 10500, atk: 178, def: 52, crit: 0.1 };
+  E.lesson_warden = wd;
 })();

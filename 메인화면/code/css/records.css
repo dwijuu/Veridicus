@@ -130,3 +130,31 @@
 .lb-gramo { margin-left: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--on-dark, #f7f4ee); font-size: 13px; font-weight: 500; }
 .lb-gramo .lb-ico { width: 34px; height: 34px; }
 .lb-gramo:hover { color: var(--hover-light, #f2c9a4); }
+
+/* ── 버튼 크기 (휴대폰 고려) ── */
+.rc-top { top: 24px; }
+.rc-ico { width: 66px; height: 66px; }
+.rc-ico svg { width: 42px; height: 42px; }
+.rc-heading b { font-size: 36px; }
+.rc-heading span { font-size: 19px; }
+.rc-track { padding: 12px 18px 12px 12px; grid-template-columns: 38px 68px 1fr auto; }
+.rc-track img { width: 68px; height: 68px; }
+.rc-name b { font-size: 24px; }
+.rc-name small { font-size: 17px; }
+.rc-name em { font-size: 13px; }
+.rc-time { font-size: 20px; }
+.rc-no { font-size: 21px; }
+.rc-play { min-width: 190px; height: 68px; font-size: 25px; }
+.rc-state { font-size: 20px; }
+.rc-vol svg { width: 28px; height: 28px; }
+.rc-vol input::-webkit-slider-thumb { width: 24px; height: 24px; }
+.rc-vol input::-moz-range-thumb { width: 24px; height: 24px; }
+.rc-vol output { font-size: 21px; width: 36px; }
+.rc-info { width: 520px; }
+.rc-actions { gap: 16px; }
+.rc-play { min-width: 160px; }
+.rc-state { white-space: nowrap; flex: none; }
+.rc-vol { gap: 8px; }
+/* 로비 축음기 버튼 (휴대폰 고려 크기) */
+.lb-gramo { margin-left: 18px; gap: 8px; font-size: 20px; }
+.lb-gramo .lb-ico { width: 46px; height: 46px; }

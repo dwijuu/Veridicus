@@ -11,9 +11,23 @@ G.LINE_ICONS = {
   friends: '<circle cx="9" cy="8.5" r="3.5"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.2a3.5 3.5 0 0 1 0 6.6M17.5 14.8c2 .7 3.5 2.6 3.5 5.2"/>',
   deck:    '<rect x="7" y="3.5" width="12" height="16" rx="1"/><path d="M4.5 7v12.5a1 1 0 0 0 1 1H15"/>',
   codex:   '<path d="M12 6.5C10 5 7 4.5 3.5 5v14c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v14"/>',
-  close:   '<path d="M6 6l12 12M18 6 6 18"/>'
+  close:   '<path d="M6 6l12 12M18 6 6 18"/>',
+  home:    '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/>',
+  clock:   '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/>',
+  moon:    '<path d="M15.6 3.6A8.5 8.5 0 1 0 20.4 15a7 7 0 0 1-4.8-11.4z"/>'
 };
 
 G.lineIcon = function (key, cls) {
   return '<svg class="' + (cls || 'g-icon g-line-ico') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (G.LINE_ICONS[key] || '') + '</svg>';
+};
+
+/* 메인 화면(로비)으로 바로 가는 버튼 — 캐릭터 정보 화면의 ◎ 버튼과 같은 아이콘 */
+G.homeButton = function () {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'g-home g-ico-only';
+  b.setAttribute('aria-label', '메인 화면');
+  b.innerHTML = G.lineIcon('home');
+  b.addEventListener('click', function () { G.app.toLobby(); });
+  return b;
 };

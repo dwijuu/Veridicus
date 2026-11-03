@@ -61,6 +61,7 @@ G.Battle = (function () {
 
   /**
    * cfg = { team: [charId|null x4], enemies: [enemyId...], seed, fixedHand: [skillId...], reserve: [enemyId...] }
+   *  · allyStart: [{ status, turns }] — 전투 시작 시 아군 전원(대기석 포함)에게 거는 상태 (turns 없으면 전투 내내)
    *  · reserve: 증원 대기열 — 필드의 적이 쓰러질 때마다 그 자리에 한 명씩 채워짐 (STAGE 05 훈련용 더미)
    * team 의 앞 3칸 캐릭터가 출전, 4번째 칸 캐릭터가 대기석
    */
@@ -123,6 +124,17 @@ G.Battle = (function () {
       const d = G.DATA.enemies[u.defId];
       if (d.usesBolt) st.useEBolt = true;
       if (d.boltStart) st.eBolt += d.boltStart;
+    });
+    /* 체레스테 [진실과 거짓의 계약]: 편성 화면에서 고른 계약자 (없거나 잘못되면 체레스테가 아닌 첫 번째 아군) */
+    const party = allies.concat(bench);
+    if (party.some(function (u) { return G.DATA.characters[u.defId].contract; })) {
+      const others = party.filter(function (u) { return !G.DATA.characters[u.defId].contract; });
+      const pick = others.find(function (u) { return u.defId === cfg.contract; }) || others[0];
+      st.contractUid = pick ? pick.uid : null;
+    }
+    /* 시작 상태 (보충 수업 주간 토벌: 아군 전원이 [블랙의 위압]을 받고 시작) */
+    (cfg.allyStart || []).forEach(function (a) {
+      allies.concat(bench).forEach(function (u) { addStatus(u, a.status, a.turns == null ? null : a.turns); });
     });
     planEnemies(st);
     return st;
@@ -205,6 +217,8 @@ G.Battle = (function () {
     if (zone && src.side === 'ally' && hasElement(src, 'fire')) bonus += G.DATA.fields.blaze_zone.fireAllyBonus;
     /* [빛] 골드 속성 패시브: 블랙 속성 상대에게 주는 피해 +3% */
     if (hasElement(src, 'gold') && hasElement(dst, 'black')) bonus += R().GOLD_VS_BLACK;
+    /* [허구] (체레스테 거짓된 미래): 계약자에게 받는 피해 증가 */
+    if (src.side === 'ally' && getStatus(dst, 'fiction') && src.uid === st.contractUid) bonus += R().FICTION_BONUS;
     if (act.burdenBonus) {
       const bd = getStatus(dst, 'burden');
       if (bd) bonus += act.burdenBonus.per * bd.stacks;
@@ -404,11 +418,10 @@ G.Battle = (function () {
     if (!unit || !unit.alive || unit.moxie >= max) return ev;
     unit.moxie = Math.min(max, unit.moxie + n);
     ev.push({ type: 'moxie', unit: unit.uid, value: unit.moxie });
+    /* 열의가 가득 차면 '준비됨'만 알리고, 궁극기 카드는 다음 아군 턴이 시작될 때(draw) 마법에 추가 */
     if (unit.moxie >= max && !st.hand.some(function (c) { return c.ult && c.owner === unit.uid; })
         && st.allies.indexOf(unit) !== -1 && !activeStatus(unit, 'isolation')) {
-      const card = { uid: uid('c'), owner: unit.uid, skillId: charDef(unit).ultimate.id, ult: true };
-      st.hand.push(card);
-      ev.push({ type: 'ult', card: card, first: !st.ultShown });
+      ev.push({ type: 'ultCharged', unit: unit.uid, first: !st.ultShown });
       st.ultShown = true;
     }
     return ev;
@@ -498,6 +511,17 @@ G.Battle = (function () {
     return null;
   }
 
+  /* [물의 분신] (공격 회피): 다음 공격 1회를 통째로 무효화하고 사라짐
+   *  스킬 · 패시브 추가 공격 · 반격 모두 막힘 (지속 피해 [연소] 등은 공격이 아니므로 그대로 들어감)
+   *  · 무효를 뚫는 공격을 만들려면 그 공격에서 decoyBlock 을 거치지 않으면 됨 */
+  function decoyBlock(t, ev) {
+    const clone = getStatus(t, 'water_clone');
+    if (!clone) return false;
+    t.statuses = t.statuses.filter(function (x) { return x !== clone; });
+    ev.push({ type: 'miss', unit: t.uid, decoy: true });
+    return true;
+  }
+
   function applySkill(st, actor, skill, hint) {
     const ev = [];
     const friends = friendsOf(st, actor);
@@ -509,7 +533,9 @@ G.Battle = (function () {
     const dmgAct = skill.actions.find(function (a) { return a.do === 'damage' || a.do === 'detonate'; });
     if (dmgAct) hit = pickTargets(st, actor, dmgSpec(st, actor, dmgAct).target, hint);
     else if (skill.actions.some(function (a) { return a.to === 'target'; })) hit = pickTargets(st, actor, 'single', hint);
-    const castTargets = hit.length ? hit : (skill.actions.some(function (a) { return a.to === 'allies'; }) ? friends : [actor]);
+    const contractor = side === 'ally' ? contractorOf(st) : null;
+    const castTargets = hit.length ? hit : (skill.actions.some(function (a) { return a.to === 'allies'; }) ? friends
+      : skill.actions.some(function (a) { return a.to === 'contract'; }) && contractor ? [contractor] : [actor]);
     ev.push({ type: 'cast', actor: actor.uid, skill: skill, targets: castTargets.map(function (t) { return t.uid; }),
       allies: friends.map(function (t) { return t.uid; }) });
 
@@ -522,16 +548,13 @@ G.Battle = (function () {
     let dealt = 0, lifeSteal = 0;   // 이번 스킬로 입힌 피해 합계 · 스킬 자체 흡혈량
     const hadTruth = side === 'ally' && !!activeStatus(actor, 'truth');   // [진실]은 스킬 시작 시점 기준 (궁극기로 받은 진실은 그 궁극기에 적용 안 됨)
     /* 한 대상에게 한 번 타격 (회피 · 물의 분신 판정 포함). 맞으면 true */
+    const decoyed = [];   // 이번 스킬에서 [물의 분신]이 막아 낸 대상 → 같은 스킬의 나머지 타격(연타)도 모두 무효
     function dealHit(t, power, act) {
       if (!t.alive) return false;
+      if (decoyed.indexOf(t) !== -1) return false;
       const ev2 = mod(t, 'evade');
       if (ev2 > 0 && st.rng() < ev2) { ev.push({ type: 'miss', unit: t.uid }); return false; }
-      const clone = getStatus(t, 'water_clone');
-      if (clone) {
-        t.statuses = t.statuses.filter(function (x) { return x !== clone; });
-        ev.push({ type: 'miss', unit: t.uid, decoy: true });
-        return false;
-      }
+      if (decoyBlock(t, ev)) { decoyed.push(t); return false; }
       const r = calcDamage(st, actor, t, power, skill, act);
       applyDamage(st, t, r.dmg, ev, { crit: r.crit, source: 'skill', from: actor.uid });
       landed++;
@@ -545,7 +568,8 @@ G.Battle = (function () {
       if (act.ifSelf && !activeStatus(actor, act.ifSelf) && act.do !== 'zapAmp') return;
       if (act.do === 'damage') {
         const spec = dmgSpec(st, actor, act);
-        hit.forEach(function (t) { dealHit(t, spec.power, act); });
+        /* addIfTarget: 대상이 상태이상이면 공격력 배율을 더함 (거짓된 미래: [예언] 대상 +40%) */
+        hit.forEach(function (t) { dealHit(t, spec.power + (act.addIfTarget && getStatus(t, act.addIfTarget.status) ? act.addIfTarget.power : 0), act); });
         attacked = true;
       } else if (act.do === 'detonate') {
         /* 산소 폭발: 대상의 [연소]를 모두 소모해 스택 수에 따라 기하급수적으로 증폭 */
@@ -570,6 +594,23 @@ G.Battle = (function () {
           actor.mp = Math.min(actor.maxMp, actor.mp + Math.round(skill.mp * act.refund.ratio));
           ev.push({ type: 'mpGain', unit: actor.uid, amount: actor.mp - before, mp: actor.mp, label: '산소 과열' });
         }
+      } else if (act.do === 'afterimageBurst') {
+        /* 운명의 실타래: 이미 [예언]인 대상의 잔상을 절반 선제 폭발 */
+        hit.forEach(function (t) {
+          if ((hadStatus[t.uid] || []).indexOf(act.ifTarget) === -1 || missed(t)) return;
+          releaseAfterimage(st, t, ev, act.ratio);
+        });
+      } else if (act.do === 'afterimageStage') {
+        /* 거짓된 미래: [예언] · 잔상이 있는 적의 잔상 기록 단계 +1 */
+        const cel = celesteOf(st);
+        const maxStage = cel ? charDef(cel).passiveData.maxStage : 3;
+        foes().forEach(function (t) {
+          if (!getStatus(t, 'prophecy') && !getStatus(t, 'afterimage')) return;
+          const s2 = getStatus(t, 'afterimage') || addStatus(t, 'afterimage', null, { stacks: 0 });
+          if (!s2) return;
+          s2.stacks = Math.min(maxStage, (s2.stacks || 0) + (act.amount || 1));
+          ev.push({ type: 'status', unit: t.uid, status: 'afterimage', stacks: s2.stacks, label: '잔상 가속' });
+        });
       } else if (act.do === 'burnTransfer') {
         /* 돌풍 난타: 다른 [연소] 적의 스택 1개를 대상에게 복사 */
         hit.forEach(function (t) {
@@ -600,10 +641,10 @@ G.Battle = (function () {
           if (s2) ev.push({ type: 'status', unit: t.uid, status: 'burn', stacks: s2.stacks });
         });
       } else if (act.do === 'status') {
-        const recips = act.to === 'self' ? [actor] : act.to === 'allies' ? friends : hit;
+        const recips = act.to === 'self' ? [actor] : act.to === 'allies' ? friends : act.to === 'contract' ? (contractor ? [contractor] : []) : hit;
         recips.forEach(function (r) {
           if (!r.alive) return;
-          if (act.to !== 'self' && act.to !== 'allies' && missed(r)) return;
+          if (act.to !== 'self' && act.to !== 'allies' && act.to !== 'contract' && missed(r)) return;
           if (act.ifTarget && (hadStatus[r.uid] || []).indexOf(act.ifTarget) === -1) return;
           /* 확률 부여 (예: 한 턴 행동 불가 40%) */
           if (act.chance != null && st.rng() >= act.chance) { ev.push({ type: 'resist', unit: r.uid, status: act.status }); return; }
@@ -639,7 +680,7 @@ G.Battle = (function () {
           let n = act.all ? Infinity : (act.count || 1);
           r.statuses = r.statuses.filter(function (x) {
             const d = G.DATA.statuses[x.id];
-            if (n > 0 && d && d.kind === 'debuff') { n--; ev.push({ type: 'cleanse', unit: r.uid, status: x.id }); return false; }
+            if (n > 0 && d && d.kind === 'debuff' && !d.fixed) { n--; ev.push({ type: 'cleanse', unit: r.uid, status: x.id }); return false; }
             return true;
           });
         });
@@ -739,6 +780,44 @@ G.Battle = (function () {
       actor.mp = Math.min(actor.maxMp, actor.mp + R().GOLD_MP_ON_ATTACK);
       ev.push({ type: 'mpGain', unit: actor.uid, amount: actor.mp - before, mp: actor.mp });
     }
+    /* [그림자] 블랙 속성: 상대에게 피해를 준 스킬마다 (방식 무관) 피해를 입은 상대의 마력을 조금씩 빼앗고, 자신의 마력을 채움
+     *  · 마력이 없는 상대(적)에게서는 빼앗을 것이 없어도 자신의 마력은 그대로 채움 */
+    if (hasElement(actor, 'black')) {
+      const struck = [];
+      ev.forEach(function (x) {
+        if (x.type !== 'damage' || x.source !== 'skill' || x.from !== actor.uid) return;
+        const t = find(st, x.unit);
+        if (t && t.side !== side && struck.indexOf(t) === -1) struck.push(t);
+      });
+      if (struck.length) {
+        struck.forEach(function (t) {
+          if (!t.maxMp || t.mp <= 0) return;
+          const take = Math.min(t.mp, R().BLACK_MP_STEAL);
+          t.mp -= take;
+          ev.push({ type: 'mpLoss', unit: t.uid, amount: take, mp: t.mp, label: '그림자' });
+        });
+        if (actor.maxMp && actor.mp < actor.maxMp) {
+          const before = actor.mp;
+          actor.mp = Math.min(actor.maxMp, actor.mp + R().BLACK_MP_GAIN);
+          ev.push({ type: 'mpGain', unit: actor.uid, amount: actor.mp - before, mp: actor.mp, label: '그림자' });
+        }
+      }
+    }
+    /* 체레스테 패시브 [예정된 행동]: 스킬 시작 때 [예언] 상태였던 적에게 준 피해의 일부를 [시간의 잔상]으로 기록
+     *  · [확정된 미래]면 기록 즉시 계약자가 현실화 (아군 공격마다 연쇄 · 턴 제한 없음) */
+    if (side === 'ally' && attacked) {
+      const recorded = [];
+      hit.forEach(function (t) {
+        if ((hadStatus[t.uid] || []).indexOf('prophecy') === -1) return;
+        const dmg = ev.reduce(function (n, x) { return n + (x.type === 'damage' && x.unit === t.uid && x.from === actor.uid && x.source === 'skill' && !x.follow ? x.amount : 0); }, 0);
+        if (dmg > 0 && recordAfterimage(st, actor, t, dmg, ev)) recorded.push(t);
+      });
+      if (recorded.length) {
+        st.foresee = 0;   // [미래 예언] 보너스는 잔상을 만든 공격 1회에 쓰임
+        const con = contractorOf(st);
+        if (con && activeStatus(con, 'fated')) recorded.forEach(function (t) { releaseAfterimage(st, t, ev, 1); });
+      }
+    }
     /* [고립]: 그 캐릭터의 카드는 마법에서 사라지고(궁극기 포함), 고립이 끝날 때까지 뽑히지 않음 */
     if (side === 'ally' && activeStatus(actor, 'isolation')) {
       const gone = st.hand.filter(function (c) { return c.owner === actor.uid; }).map(function (c) { return c.uid; });
@@ -794,6 +873,94 @@ G.Battle = (function () {
       if (actor.statuses.length !== before) ev.push({ type: 'statusTick', unit: actor.uid });
     }
     actor.statuses.forEach(function (s) { delete s.fresh; });
+    return ev;
+  }
+
+  /* ── 체레스테 [진실과 거짓의 계약] ─────────────────────── */
+  function contractorOf(st) {
+    if (!st.contractUid) return null;
+    const c = find(st, st.contractUid);
+    return c && c.alive ? c : null;
+  }
+  function celesteOf(st) { return st.allies.find(function (u) { return u.alive && charDef(u).passive === 'prophecy'; }) || null; }
+  function setContract(st, uid) {
+    const u = find(st, uid);
+    if (!u || u.side !== 'ally' || charDef(u).contract) return false;
+    st.contractUid = uid;
+    return true;
+  }
+  /* 계약자의 '일반 공격': 공격력 × normalPower (속성 · 연출은 계약자의 첫 번째 공격 스킬) */
+  function followSkill(con, P) {
+    const def = charDef(con);
+    const sk = def.skills.find(function (k) { return k.type === 'attack' && k.actions.some(function (a) { return a.do === 'damage' || a.do === 'detonate'; }); });
+    return { id: 'celeste_follow', name: P.skill.name, type: 'attack', element: (sk && sk.element) || con.element, anim: (sk && sk.anim) || 'fate_thread', actions: [] };
+  }
+  /* [시간의 잔상] 기록: 계약자가 때리면 recordRate, 다른 아군이면 otherRate
+   *  × [확정된 미래] fatedRecord · × [미래 예언] (1 + foreseeBonus × 계약자가 맞은 횟수) — 단계(스택)는 기록할 때마다 +1 (최대 maxStage) */
+  function recordAfterimage(st, actor, t, dmg, ev) {
+    const cel = celesteOf(st), con = contractorOf(st);
+    if (!cel || !con || !t.alive) return false;
+    const P = charDef(cel).passiveData;
+    let rate = actor === con ? P.recordRate : P.otherRate;
+    if (activeStatus(con, 'fated')) rate *= P.fatedRecord;
+    rate *= 1 + P.foreseeBonus * (st.foresee || 0);
+    const amount = Math.max(1, Math.round(dmg * rate));
+    const s = getStatus(t, 'afterimage') || addStatus(t, 'afterimage', null, { stacks: 0 });
+    if (!s) return false;
+    s.value = (s.value || 0) + amount;
+    s.stacks = Math.min(P.maxStage, (s.stacks || 0) + 1);
+    ev.push({ type: 'status', unit: t.uid, status: 'afterimage', stacks: s.stacks, label: '잔상 +' + amount });
+    return true;
+  }
+  /* 잔상 현실화: 계약자가 그 적에게 추가 공격
+   *  피해 = 일반 공격 × ratio(60% · [확정된 미래] 80%) — 최소 floor
+   *       × (1 + min(ampCap, stageAmp × 단계 + 기록된 피해 ÷ (계약자 공격력 × ampDiv)))
+   *  part: 잔상 중 현실화할 비율 (운명의 실타래 선제 폭발 0.5) */
+  function releaseAfterimage(st, t, ev, part) {
+    const cel = celesteOf(st), con = contractorOf(st);
+    const s = getStatus(t, 'afterimage');
+    if (!cel || !con || !s || !t.alive || st.allies.indexOf(con) === -1) return false;
+    const P = charDef(cel).passiveData;
+    const fated = !!activeStatus(con, 'fated');
+    const A = Math.round((s.value || 0) * part);
+    const stage = part >= 1 ? s.stacks : Math.max(1, Math.floor(s.stacks / 2));
+    const fsk = followSkill(con, P);
+    ev.push({ type: 'cast', actor: con.uid, skill: fsk, targets: [t.uid], allies: [], passive: true, follow: true });
+    if (part >= 1) t.statuses = t.statuses.filter(function (x) { return x !== s; });
+    else { s.value -= A; s.stacks = Math.max(0, s.stacks - stage); if (s.stacks <= 0 || s.value <= 0) t.statuses = t.statuses.filter(function (x) { return x !== s; }); }
+    ev.push({ type: 'statusTick', unit: t.uid });
+    if (decoyBlock(t, ev)) return true;
+    const r = calcDamage(st, con, t, P.normalPower * (fated ? P.fatedRatio : P.ratio), fsk, {});
+    const amp = Math.min(P.ampCap, P.stageAmp * stage + A / (effAtk(con) * P.ampDiv));
+    const dmg = Math.round(Math.max(P.floor, r.dmg) * (1 + amp));
+    applyDamage(st, t, dmg, ev, { crit: r.crit, source: 'skill', from: con.uid, follow: true });
+    return true;
+  }
+  /* 아군의 공격 행동이 모두 끝난 뒤: 잔상이 쌓인 적부터 계약자가 현실화 (턴당 perTurn 회) */
+  function afterAllyPhase(st) {
+    const ev = [];
+    const cel = celesteOf(st), con = contractorOf(st);
+    if (!cel || !con || st.allies.indexOf(con) === -1) return ev;
+    const P = charDef(cel).passiveData;
+    const list = livingEnemies(st).filter(function (e) { return getStatus(e, 'afterimage'); })
+      .sort(function (a, b) { return getStatus(b, 'afterimage').value - getStatus(a, 'afterimage').value; });
+    list.slice(0, P.perTurn).forEach(function (e) { releaseAfterimage(st, e, ev, 1); });
+    ev.push.apply(ev, cleanupDead(st));
+    return ev;
+  }
+  /* [대역]: 계약자가 적에게 맞으면 그 적에게 [예언] + [미래 예언] (맞은 횟수만큼 다음 잔상 효율 +50%씩) */
+  function proxyCounter(st, enemy, events) {
+    const con = contractorOf(st);
+    if (!con || !activeStatus(con, 'proxy')) return [];
+    const hits = events.filter(function (x) { return x.type === 'damage' && x.unit === con.uid && x.from === enemy.uid && x.source === 'skill'; }).length;
+    if (!hits) return [];
+    const ev = [];
+    st.foresee = (st.foresee || 0) + hits;
+    ev.push({ type: 'foresee', unit: con.uid, value: st.foresee });
+    if (enemy.alive) {
+      const s = addStatus(enemy, 'prophecy', 2);
+      if (s) ev.push({ type: 'status', unit: enemy.uid, status: 'prophecy', stacks: 0 });
+    }
     return ev;
   }
 
@@ -910,7 +1077,7 @@ G.Battle = (function () {
     const harmPct = (u.selfHarm || 0) / u.maxHp * 100;
     const power = P.power + Math.min(P.harmMax, P.harmPer * harmPct);
     foes.forEach(function (e) {
-      if (!e.alive) return;
+      if (!e.alive || decoyBlock(e, ev)) return;
       const r = calcDamage(st, u, e, power, P.skill, {});
       applyDamage(st, e, r.dmg, ev, { crit: r.crit, source: 'skill', from: u.uid });
     });
@@ -1046,7 +1213,9 @@ G.Battle = (function () {
     const before = new Map();
     all(st).forEach(function (u) { u.statuses.forEach(function (s) { before.set(s, s.turns); }); });
     const fieldsBefore = new Map(st.fields.map(function (f) { return [f, f.turns]; }));
-    ev.push.apply(ev, applySkill(st, e, sk, target));
+    const used = applySkill(st, e, sk, target);
+    ev.push.apply(ev, used);
+    ev.push.apply(ev, proxyCounter(st, e, used));
     all(st).forEach(function (u) { u.statuses.forEach(function (s) {
       if (s.turns == null) return;
       if (!before.has(s) || s.turns > before.get(s)) s.fresh = true;
@@ -1085,18 +1254,23 @@ G.Battle = (function () {
     const maxHits = s0 >= 10 ? 3 : s0 >= P.fullStacks ? 2 : 1;
     const hits = 1 + Math.floor(st.rng() * maxHits);
     const sk = P.skill;
+    const blocked = [];   // [물의 분신]에 막힌 적은 이번 추가 공격(연속 타격)에서 계속 무효
     for (let h = 0; h < hits; h++) {
       const t = pick();
       if (!t || !alize.alive) break;
       const full = stacks(t) >= P.fullStacks;
       const others = livingEnemies(st).filter(function (e) { return e !== t; }).slice(0, 2);
       ev.push({ type: 'cast', actor: alize.uid, skill: sk, targets: [t.uid].concat(full ? others.map(function (e) { return e.uid; }) : []), allies: [], passive: true, hit: h + 1, hits: hits });
-      const r = calcDamage(st, alize, t, full ? P.fullPower : P.power, sk, {});
-      applyDamage(st, t, r.dmg, ev, { crit: r.crit, source: 'skill', from: alize.uid });
-      const b = getStatus(t, 'burn');
-      if (t.alive && b) { b.stacks += 1; ev.push({ type: 'status', unit: t.uid, status: 'burn', stacks: b.stacks }); }
+      if (blocked.indexOf(t) === -1 && decoyBlock(t, ev)) blocked.push(t);
+      if (blocked.indexOf(t) === -1) {
+        const r = calcDamage(st, alize, t, full ? P.fullPower : P.power, sk, {});
+        applyDamage(st, t, r.dmg, ev, { crit: r.crit, source: 'skill', from: alize.uid });
+        const b = getStatus(t, 'burn');
+        if (t.alive && b) { b.stacks += 1; ev.push({ type: 'status', unit: t.uid, status: 'burn', stacks: b.stacks }); }
+      }
       if (full) others.forEach(function (e) {
-        if (!e.alive) return;
+        if (!e.alive || blocked.indexOf(e) !== -1) return;
+        if (decoyBlock(e, ev)) { blocked.push(e); return; }
         const r2 = calcDamage(st, alize, e, P.splash, sk, {});
         applyDamage(st, e, r2.dmg, ev, { crit: r2.crit, source: 'skill', from: alize.uid });
       });
@@ -1252,7 +1426,7 @@ G.Battle = (function () {
 
   return {
     create, draw, queue, unqueue, isQueued, queueFull, hasPlayable, availableSlots, setTarget, currentTarget,
-    resolveNext, resolveSpecials, hasElement, enemyActions, resolveEnemy, endTurn, outcome, finale, canSwap, swap, canShuffle, shuffle, autoPlan,
+    resolveNext, resolveSpecials, afterAllyPhase, setContract, hasElement, enemyActions, resolveEnemy, endTurn, outcome, finale, canSwap, swap, canShuffle, shuffle, autoPlan,
     find, skillOf, charDef, effAtk, effDef, getStatus, activeStatus, lightningCount, projectedCost, HAND_CAP
   };
 })();

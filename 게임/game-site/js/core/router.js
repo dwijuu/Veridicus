@@ -6,6 +6,7 @@
  *  #/stage/ch1-s1/story       스토리
  *  #/stage/ch1-s1/formation   편성
  *  #/stage/ch1-s1/battle      전투
+ *  #/lesson                   보충 수업 (주간 · 일간 토벌) — 스테이지 id: ls-weekly · ls-daily
  *
  * · 화면은 { mount(root, params, ctx), unmount() } 형태. 전환 시 이전 화면을 반드시 unmount →
  *   리스너·타이머·진행 중 연출(AbortSignal)이 모두 정리되어 이전 상태가 남지 않습니다.
@@ -29,6 +30,7 @@ G.router = (function () {
   function parse(hash) {
     const parts = (hash || '').replace(/^#\/?/, '').split('/').filter(Boolean);
     if (parts[0] === 'chapter' && parts[1]) return { name: 'map', chapterId: parts[1] };
+    if (parts[0] === 'lesson') return { name: 'lesson' };
     if (parts[0] === 'stage' && parts[1]) return { name: parts[2] || 'formation', stageId: parts[1] };
     return { name: 'select' };
   }
@@ -42,7 +44,7 @@ G.router = (function () {
     if (r.stageId !== undefined) {
       const st = G.DATA.stages[r.stageId];
       if (!st) return '#/';
-      if (!G.save.isStageUnlocked(r.stageId)) return G.save.isChapterUnlocked(st.chapter) ? '#/chapter/' + st.chapter : '#/';
+      if (!G.save.isStageUnlocked(r.stageId)) return st.lesson ? '#/lesson' : G.save.isChapterUnlocked(st.chapter) ? '#/chapter/' + st.chapter : '#/';
       if (st.storyOnly && r.name !== 'story') return '#/stage/' + r.stageId + '/story';
       if (r.name === 'after') return (st.afterStory && G.save.isCleared(r.stageId)) ? null : '#/chapter/' + st.chapter;
       if (['story', 'formation', 'battle'].indexOf(r.name) === -1) return '#/stage/' + r.stageId + '/formation';
@@ -91,7 +93,7 @@ G.router = (function () {
       clearBattleSession: function () { battleSession = null; }
     };
     /* 화면 파일이 없거나(업로드 누락 · 경로 오류) 불러오지 못한 경우: 어떤 파일인지 알려 줌 */
-    const FILES = { select: 'js/screens/chapter-select.js', chapter: 'js/screens/chapter-map.js', story: 'js/screens/story.js', formation: 'js/screens/formation.js', battle: 'js/screens/battle-ui.js' };
+    const FILES = { select: 'js/screens/chapter-select.js', chapter: 'js/screens/chapter-map.js', lesson: 'js/screens/lesson.js', story: 'js/screens/story.js', formation: 'js/screens/formation.js', battle: 'js/screens/battle-ui.js' };
     if (typeof factory !== 'function') { fail(new Error('화면 파일을 불러오지 못했습니다: ' + (FILES[r.name] || r.name) + ' (파일이 없거나 위치가 다릅니다)')); return; }
     try {
       const inst = factory();
@@ -108,7 +110,7 @@ G.router = (function () {
     console.error(err);
     root.innerHTML = '';
     const box = G.util.el('div', 'g-error');
-    box.innerHTML = '<div class="g-error-code">ERROR // SCREEN</div>' +
+    box.innerHTML = '<div class="g-error-code">ERROR · SCREEN</div>' +
       '<div class="g-error-msg">화면을 불러오는 중 문제가 발생했습니다.</div>' +
       '<div class="g-error-detail"></div>';
     /* 원인 확인용: 오류 내용 (휴대폰 등 개발자 도구를 열기 어려운 환경에서도 볼 수 있게) */
@@ -129,5 +131,8 @@ G.router = (function () {
     render();
   }
 
-  return { register, start, go };
+  /* 스테이지에서 나갈 때 돌아갈 화면 (보충 수업 스테이지는 보충 수업 화면으로) */
+  function backOf(st) { return (st && st.backHash) || '#/chapter/' + (st && st.chapter); }
+
+  return { register, start, go, backOf };
 })();

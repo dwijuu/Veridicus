@@ -167,3 +167,19 @@
 .dt-traits .mc-ico .g-icon { width: 18px; height: 18px; }
 .dt-traits b { font-size: 15px; font-weight: 700; color: #fff; }
 .dt-traits p { margin-top: 2px; font-size: 13px; line-height: 1.5; color: #b3aba1; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ── 버튼 크기 (휴대폰 고려) ── */
+.dt-top { inset: 24px 40px auto 28px; gap: 20px; }
+.dt-ico-btn { width: 66px; height: 66px; }
+.dt-ico-btn svg { width: 42px; height: 42px; }
+.dt-rail { left: 34px; top: 114px; gap: 8px; }
+.dt-rail-item { width: 70px; height: 70px; }
+/* 속성 패시브(블랙 · 골드) 특성이 붙어 3개가 되면 한 줄에 3칸 */
+.dt-traits:has(li:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+.dt-traits:has(li:nth-child(3)) li { padding: 12px 12px 12px 10px; gap: 10px; }
+.dt-traits:has(li:nth-child(3)) p { -webkit-line-clamp: 4; }
+
+/* ══ v1.5 · 특성 카드: 한 줄 요약만 표시 (말줄임 없이 전부 보임 · 자세한 설명은 툴팁) ══ */
+.dt-traits li { align-items: center; cursor: help; }
+.dt-traits b { display: block; line-height: 1.3; word-break: keep-all; }
+.dt-traits p, .dt-traits:has(li:nth-child(3)) p { display: block; -webkit-line-clamp: unset; overflow: visible; line-height: 1.4; margin-top: 3px; }

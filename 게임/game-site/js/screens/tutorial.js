@@ -22,8 +22,8 @@ G.Tutorial = (function () {
       text: '사용한 카드는 위쪽 <b>행동 슬롯</b>에 올라가며, 이 순서대로 시전합니다. 슬롯 수는 <b>편성 인원</b>과 같아서, 함께 싸우는 동료가 많을수록 한 턴에 더 많은 카드를 쓸 수 있습니다.',
       todo: '슬롯의 카드를 클릭해 원래 자리로 되돌려 보세요.' },
     { id: 'hover', title: '카드 정보', allow: [], target: 'hand', wait: 'tip', next: true,
-      text: '카드 위에 <b>마우스를 올리면</b> 자세한 설명을 볼 수 있습니다. 카드 왼쪽 위 숫자는 <b>마력(MP) 소모량</b>입니다. 마력이 모자라면 부족한 만큼 <b>체력</b>을 대신 소모합니다.',
-      todo: '카드 위에 마우스를 올려 보세요.' },
+      text: '카드 위에 <b>마우스를 올리면</b>(휴대폰은 <b>길게 누르면</b>) 자세한 설명을 볼 수 있습니다. 카드 왼쪽 위 숫자는 <b>마력(MP) 소모량</b>입니다. 마력이 모자라면 부족한 만큼 <b>체력</b>을 대신 소모합니다.',
+      todo: '카드 위에 마우스를 올려 보세요. (휴대폰: 길게 누르기)' },
     { id: 'intent', title: '적의 예고', allow: [], target: 'intent', next: true,
       text: '적 머리 위의 표시는 적이 <b>이번 턴에 할 행동</b>입니다. 마우스를 올리면 자세히 볼 수 있으니, 보고 나서 어떤 카드를 쓸지 정하세요.' },
     { id: 'target', title: '공격 대상', allow: ['target'], target: 'enemy', wait: 'target',
@@ -34,7 +34,7 @@ G.Tutorial = (function () {
       todo: '카드를 사용해 턴을 진행하세요.' },
     { id: 'status', title: '버프 · 디버프', allow: [], target: 'status', wait: 'tip', next: true,
       text: '머리 위의 작은 아이콘은 지금 걸려 있는 <b>버프</b>와 <b>디버프</b>입니다. 숫자는 남은 턴 수(또는 쌓인 수)이고, 마우스를 올리면 효과를 볼 수 있습니다.',
-      todo: '아이콘에 마우스를 올려 효과를 확인해 보세요.' },
+      todo: '아이콘에 마우스를 올려 효과를 확인해 보세요. (휴대폰: 길게 누르기)' },
     { id: 'moxie', title: '열의와 궁극기', allow: [], target: 'moxie', next: true,
       text: '캐릭터가 카드를 쓸 때마다 그 캐릭터의 마름모(<b>열의</b>)가 쌓입니다. 마름모가 가득 차면 그 캐릭터의 <b>궁극기</b> 카드가 들어오며, 궁극기는 마력을 쓰지 않습니다.' },
     { id: 'shuffle', title: '카드 셔플', allow: [], target: 'shuffle', next: true,
@@ -65,6 +65,9 @@ G.Tutorial = (function () {
     const spot = U.el('div', 'tut-spot');
     const box = U.el('div', 'tut-box');
     layer.append(spot, box);
+    /* 처음에는 숨겨 둠: 전투 시작 연출 중에 빈 설명창이 왼쪽 위에 잠깐 보였다 사라지지 않도록
+     *  (플레이어 차례가 되면 notify('playerPhase') → render() 에서 표시) */
+    layer.style.display = 'none';
     ui.screen.appendChild(layer);
 
     const offTip = G.tip.onShow(function (el) {

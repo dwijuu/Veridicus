@@ -64,8 +64,8 @@ G.DATA.characters = {
     combat: { hp: 520, atk: 100, def: 40, crit: 0.05, mp: 60 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[연소]', icon: 'flame', desc: '적에게 쌓이는 불꽃. 턴이 끝날 때마다 쌓인 만큼 화염 피해를 줍니다.' },
-      { name: '불씨 공급', icon: 'pyro', desc: '스킬로 [연소]를 쌓아 알리제의 공격을 돕습니다.' }
+      { name: '[연소]', icon: 'flame', short: '턴마다 화염 지속 피해', desc: '적에게 쌓이는 불꽃. 턴이 끝날 때마다 쌓인 만큼 화염 피해를 줍니다.' },
+      { name: '불씨 공급', icon: 'pyro', short: '[연소]로 알리제를 지원', desc: '스킬로 [연소]를 쌓아 알리제의 공격을 돕습니다.' }
     ],
     skills: [
       {
@@ -126,8 +126,8 @@ G.DATA.characters = {
     combat: { hp: 460, atk: 90, def: 35, crit: 0.05, mp: 20 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[감속]', icon: 'slow', desc: '물의 흐름으로 적의 행동 순서를 늦춥니다.' },
-      { name: '마력 감지', icon: 'eye', desc: '적의 약점을 읽어 방어력을 낮춥니다.' }
+      { name: '[감속]', icon: 'slow', short: '적의 행동 순서를 늦춤', desc: '물의 흐름으로 적의 행동 순서를 늦춥니다.' },
+      { name: '마력 감지', icon: 'eye', short: '적 방어력 감소', desc: '적의 약점을 읽어 방어력을 낮춥니다.' }
     ],
     skills: [
       {
@@ -185,8 +185,8 @@ G.DATA.characters = {
     combat: { hp: 500, atk: 105, def: 40, crit: 0.05, mp: 70 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[속박]', icon: 'vine', desc: '덩굴로 적을 묶어 다음 행동을 늦춥니다.' },
-      { name: '[도약]', icon: 'leap', desc: '덩굴을 딛고 뛰어올라 다음 공격을 강하게 합니다.' }
+      { name: '[속박]', icon: 'vine', short: '적의 다음 행동을 늦춤', desc: '덩굴로 적을 묶어 다음 행동을 늦춥니다.' },
+      { name: '[도약]', icon: 'leap', short: '다음 공격 강화', desc: '덩굴을 딛고 뛰어올라 다음 공격을 강하게 합니다.' }
     ],
     skills: [
       {
@@ -249,9 +249,9 @@ G.DATA.characters = {
     },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[연소]', icon: 'flame', desc: '적에게 쌓이는 불꽃. 턴이 끝날 때마다 쌓인 만큼 화염 피해를 줍니다.' },
-      { name: '[잔불의 후폭풍] 패시브', icon: 'dash', desc: '턴이 끝날 때, [연소]가 많이 쌓인 적에게 돌진해 한 번 더 공격합니다. 불꽃이 많을수록 더 세게, 여러 번 공격합니다.' },
-      { name: '[산소 과열]', icon: 'burst', desc: '[연소]를 터뜨리면 마력을 돌려받습니다.' }
+      { name: '[연소]', icon: 'flame', short: '턴마다 화염 지속 피해', desc: '적에게 쌓이는 불꽃. 턴이 끝날 때마다 쌓인 만큼 화염 피해를 줍니다.' },
+      { name: '[잔불의 후폭풍] 패시브', icon: 'dash', short: '[연소] 많은 적을 추격', desc: '턴이 끝날 때, [연소]가 많이 쌓인 적에게 돌진해 한 번 더 공격합니다. 불꽃이 많을수록 더 세게, 여러 번 공격합니다.' },
+      { name: '[산소 과열]', icon: 'burst', short: '기폭하면 마력 환급', desc: '[연소]를 터뜨리면 마력을 돌려받습니다.' }
     ],
     skills: [
       {
@@ -318,8 +318,9 @@ G.DATA.characters = {
     combat: { hp: 450, atk: 120, def: 32, crit: 0.1, mp: 50 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[번개]', icon: 'bolt', desc: '파티가 함께 모으는 번개 스택. 번개 속성 스킬을 쓰거나 [찌릿]이 반응할 때 쌓입니다.' },
-      { name: '번개 파티', icon: 'chain', desc: '번개 속성 아군이 많을수록 더 강해집니다. 궁극기는 [번개]가 많을수록 큰 피해를 줍니다.' }
+      { name: '골드', icon: 'sun', element: 'gold', short: '블랙 상대 피해 +10%', desc: '[빛] 블랙에게 주는 피해 +10%. 공격할 때 마력을 조금 흡수하고, 가끔 [마력 분배] 카드가 생깁니다.' },
+      { name: '[번개]', icon: 'bolt', short: '파티가 함께 쓰는 스택', desc: '파티가 함께 모으는 번개 스택. 번개 속성 스킬을 쓰거나 [찌릿]이 반응할 때 쌓입니다.' },
+      { name: '번개 파티', icon: 'chain', short: '번개 아군 수만큼 강화', desc: '번개 속성 아군이 많을수록 더 강해집니다. 궁극기는 [번개]가 많을수록 큰 피해를 줍니다.' }
     ],
     skills: [
       {
@@ -385,8 +386,9 @@ G.DATA.characters = {
     combat: { hp: 470, atk: 100, def: 36, crit: 0.05, mp: 50 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[번개]', icon: 'bolt', desc: '파티가 함께 모으는 번개 스택. 번개 속성 스킬을 쓰거나 [찌릿]이 반응할 때 쌓입니다.' },
-      { name: '[EMS]', icon: 'ems', desc: '궁극기로 적의 스킬 하나를 몇 턴 동안 봉인합니다.' }
+      { name: '블랙', icon: 'moon', element: 'black', short: '피해 줄 때 마력 흡수', desc: '[그림자] 피해를 줄 때마다 상대의 마력을 조금 빼앗아 자신의 마력을 채웁니다.' },
+      { name: '[번개]', icon: 'bolt', short: '파티가 함께 쓰는 스택', desc: '파티가 함께 모으는 번개 스택. 번개 속성 스킬을 쓰거나 [찌릿]이 반응할 때 쌓입니다.' },
+      { name: '[EMS]', icon: 'ems', short: '적 스킬 하나 봉인', desc: '궁극기로 적의 스킬 하나를 몇 턴 동안 봉인합니다.' }
     ],
     skills: [
       {
@@ -453,7 +455,7 @@ G.DATA.characters = {
     combat: { hp: 560, atk: 95, def: 50, crit: 0.05, mp: 50 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[부담감]', icon: 'weight', desc: '적을 짓눌러 공격력과 방어력을 낮춥니다. (최대 3중첩)' }
+      { name: '[부담감]', icon: 'weight', short: '적 공격 · 방어 감소', desc: '적을 짓눌러 공격력과 방어력을 낮춥니다. (최대 3중첩)' }
     ],
     skills: [
       {
@@ -514,9 +516,9 @@ G.DATA.characters = {
     combat: { hp: 420, atk: 80, def: 38, crit: 0, mp: 60 },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[신경망 동조]', icon: 'link', desc: '아군이 받는 피해를 나누어 한 명이 쓰러지지 않게 합니다.' },
-      { name: '[세포벽 정화]', icon: 'cell', desc: '지속 피해와 디버프를 약하게 만듭니다.' },
-      { name: '[고립]', icon: 'stun', desc: '연결에 집중하는 동안 스킬을 쓸 수 없습니다.' }
+      { name: '[신경망 동조]', icon: 'link', short: '아군 피해 분산', desc: '아군이 받는 피해를 나누어 한 명이 쓰러지지 않게 합니다.' },
+      { name: '[세포벽 정화]', icon: 'cell', short: '지속 피해 약화', desc: '지속 피해와 디버프를 약하게 만듭니다.' },
+      { name: '[고립]', icon: 'stun', short: '연결 중 스킬 사용 불가', desc: '연결에 집중하는 동안 스킬을 쓸 수 없습니다.' }
     ],
     skills: [
       {
@@ -586,8 +588,9 @@ G.DATA.characters = {
     },
     /* 프로필: 짧은 설명만 (사용하는 패시브 · 이 캐릭터만의 메커니즘) */
     mechanics: [
-      { name: '[마지막 발악] 패시브', icon: 'burst', desc: '쓰러질 때 적 전체에 큰 반격 피해를 주고, 아군에게 [진실]을 남깁니다.' },
-      { name: '[진실]', icon: 'book', desc: '3턴간 아군의 공격이 준 피해의 일부만큼 체력을 회복합니다.' }
+      { name: '골드', icon: 'sun', element: 'gold', short: '블랙 상대 피해 +10%', desc: '[빛] 블랙에게 주는 피해 +10%. 공격할 때 마력을 조금 흡수하고, 가끔 [마력 분배] 카드가 생깁니다.' },
+      { name: '[마지막 발악] 패시브', icon: 'burst', short: '쓰러질 때 광역 반격', desc: '쓰러질 때 적 전체에 큰 반격 피해를 주고, 아군에게 [진실]을 남깁니다.' },
+      { name: '[진실]', icon: 'book', short: '준 피해의 일부 흡혈', desc: '3턴간 아군의 공격이 준 피해의 일부만큼 체력을 회복합니다.' }
     ],
     skills: [
       {
@@ -630,22 +633,102 @@ G.DATA.characters = {
         { do: 'status', to: 'allies', status: 'truth', turns: 3 }
       ]
     }
+  },
+
+  /* ── 체레스테 (게임 전용 · 블랙 · 가짜 예언자) ───────────────
+   *  고유 시스템 [진실과 거짓의 계약]: 전투 시작 때 아군 1명을 계약자로 지정 (battle-ui 계약자 선택 → B.setContract)
+   *  패시브 [예정된 행동] — 엔진 recordAfterimage · releaseAfterimage · afterAllyPhase:
+   *    아군이 [예언] 적을 공격하면 피해 일부가 [시간의 잔상]으로 기록 → 아군 공격이 끝나면 계약자가 추가 공격 (턴당 2회)
+   *    · 추가 공격은 행동 슬롯 · 마력 · 열의를 쓰지 않고, 다른 추가 공격을 일으키지 않음 */
+  Character_18: {
+    id: 'Character_18', gameOnly: true,
+    name: '체레스테',
+    nameEn: 'Celeste',
+    themeColor: '#6E6A7C',
+    role: '딜러 / 서포터 (가짜 예언자 · 계약 추가 공격)',
+    element: 'black',
+    contract: true,          // 전투 시작 때 계약자 지정
+    ultPoints: 5,
+    images: { full: 'assets/characters/Character_18/full.svg' },
+    combat: { hp: 480, atk: 115, def: 36, crit: 0.08, mp: 60 },
+    passive: 'prophecy',
+    passiveData: {
+      normalPower: 2.0,       // 계약자 '일반 공격' = 공격력 200%
+      ratio: 0.6, fatedRatio: 0.8,
+      floor: 110,             // 추가 공격 최소 피해 (증폭 전)
+      perTurn: 2,             // 턴당 최대 발동 ([확정된 미래]는 제한 없이 즉시 연쇄)
+      recordRate: 0.4,        // 계약자가 [예언] 적에게 준 피해 → 잔상 기록 비율
+      otherRate: 0.2,         // 다른 아군이 준 피해 → 잔상 기록 비율
+      fatedRecord: 2,         // [확정된 미래]: 기록 계수 ×2
+      foreseeBonus: 0.5,      // [미래 예언]: 계약자가 맞은 횟수 1회당 다음 잔상 +50%
+      maxStage: 3, stageAmp: 0.2, ampDiv: 5, ampCap: 1.0,   // 증폭 = min(100%, 단계 × 20% + 기록 피해 ÷ (계약자 공격력 × 5))
+      skill: { id: 'celeste_follow', name: '예정된 행동', nameEn: 'Scheduled Act', type: 'attack', element: 'black', anim: 'fate_thread', actions: [] }
+    },
+    mechanics: [
+      { name: '블랙', icon: 'moon', element: 'black', short: '피해 줄 때 마력 흡수', desc: '[그림자] 피해를 줄 때마다 상대의 마력을 조금 빼앗아 자신의 마력을 채웁니다.' },
+      { name: '[예정된 행동] 패시브', icon: 'contract', short: '[시간의 잔상]을 계약자가 현실화', desc: '아군이 [예언] 상태의 적을 공격하면 피해의 일부가 [시간의 잔상]으로 기록됩니다. 아군의 공격이 끝나면 계약자가 잔상을 현실화해 추가 공격합니다. (일반 공격의 60% · 잔상이 클수록 최대 2배 · 턴당 2회)' },
+      { name: '진실과 거짓의 계약', icon: 'prophecy', short: '전투 시작 때 계약자 지정', desc: '전투가 시작되면 아군 한 명을 계약자로 고릅니다. 추가 공격은 행동 · 마력 · 열의를 쓰지 않고, 다른 추가 공격을 일으키지 않습니다.' }
+    ],
+    skills: [
+      {
+        id: 'celeste_s1', art: 'assets/characters/Character_18/skill_celeste_s1.svg', name: '운명의 실타래', nameEn: 'Thread of Fate',
+        category: '단일 공격 / [예언] 부여 · 잔상 선제 폭발', type: 'attack', element: 'black', anim: 'fate_thread', icon: 'thread', mp: 6,
+        desc: '적 1명에게 180%의 공격 피해를 입히고 2턴간 [예언]을 부여합니다. 이미 [예언] 상태인 적을 공격하면 피해량이 30% 증가하고, 그 적에게 쌓인 [시간의 잔상]의 절반을 즉시 선제 폭발시킵니다.',
+        note: '체레스테가 직접 적의 미래를 정하는 공격. 패시브 추가 공격의 조건을 만듭니다. (선제 폭발은 턴당 횟수에 포함되지 않음)',
+        actions: [
+          { do: 'damage', target: 'single', power: 1.8, bonusIfTarget: { status: 'prophecy', bonus: 0.3 } },
+          { do: 'afterimageBurst', ifTarget: 'prophecy', ratio: 0.5 },
+          { do: 'status', to: 'hit', status: 'prophecy', turns: 2 }
+        ]
+      },
+      {
+        id: 'celeste_s2', art: 'assets/characters/Character_18/skill_celeste_s2.svg', name: '미래의 대역', nameEn: 'Stand-in of the Future',
+        category: '계약자 강화 / 피해 감소 & [예언] 부여', type: 'buff', element: 'black', anim: 'future_proxy', icon: 'clone', mp: 5,
+        desc: '계약자에게 2턴간 [대역]을 부여합니다. [대역] 상태의 계약자는 받는 피해가 20% 감소하고, 공격받으면 공격한 적에게 [예언]을 부여합니다.',
+        note: '[미래 예언]: 계약자가 맞은 횟수만큼 아군의 다음 공격이 만드는 [시간의 잔상]이 50%씩 늘어납니다. 계약자를 공격하는 행위 자체가 새로운 예언을 만듭니다.',
+        actions: [
+          { do: 'status', to: 'contract', status: 'proxy', turns: 2 }
+        ]
+      },
+      {
+        id: 'celeste_s3', art: 'assets/characters/Character_18/skill_celeste_s3.svg', name: '거짓된 미래', nameEn: 'False Future',
+        category: '범위 공격 / [허구] 부여 · 잔상 가속', type: 'attack', element: 'black', anim: 'false_future', icon: 'mask', mp: 10,
+        desc: '적 전체에게 140%의 공격 피해를 입히고 2턴간 [허구]를 부여합니다. 이미 [예언] 상태인 적에게는 공격력의 40%만큼 추가 피해를 주고, [예언] · 잔상이 있는 모든 적의 잔상 기록 단계를 한 단계 올립니다.',
+        note: '[허구]: 계약자에게 받는 피해가 20% 증가합니다.',
+        actions: [
+          { do: 'damage', target: 'all', power: 1.4, addIfTarget: { status: 'prophecy', power: 0.4 } },
+          { do: 'status', to: 'hit', status: 'fiction', turns: 2 },
+          { do: 'afterimageStage', amount: 1 }
+        ]
+      }
+    ],
+    ultimate: {
+      id: 'celeste_ult', art: 'assets/characters/Character_18/skill_celeste_ult.svg', name: '예정된 결말', nameEn: 'Foretold Ending',
+      category: '적 전체 공격 / [예언] 부여 & 계약 강화', type: 'attack', element: 'black', anim: 'destined_end', icon: 'hourglass', mp: 0,
+      desc: '적 전체에게 200%의 공격 피해를 입히고 3턴간 [예언]을 부여합니다. 계약자에게 3턴간 [확정된 미래]를 부여합니다.',
+      note: '[확정된 미래]: 잔상 기록량 2배 · 추가 공격 피해가 일반 공격의 80%로 증가 · 턴당 제한 없이 아군이 공격할 때마다 즉시 추가 공격이 이어집니다.',
+      actions: [
+        { do: 'damage', target: 'all', power: 2.0 },
+        { do: 'status', to: 'hit', status: 'prophecy', turns: 3 },
+        { do: 'status', to: 'contract', status: 'fated', turns: 3 }
+      ]
+    }
   }
 };
 
-/* 편성 화면 캐릭터 목록 — 기존 사이트 캐릭터 목록 순서 + 게임 전용 캐릭터(레이 · 코루스코 · 페델레 · 실반 · 시멜) */
-G.DATA.roster = ['Character_05', 'Character_10', 'Character_11', 'Character_12', 'Character_13', 'Character_14', 'Character_15', 'Character_16', 'Character_17'];
+/* 편성 화면 캐릭터 목록 — 기존 사이트 캐릭터 목록 순서 + 게임 전용 캐릭터(레이 · 코루스코 · 페델레 · 실반 · 시멜 · 체레스테) */
+G.DATA.roster = ['Character_05', 'Character_10', 'Character_11', 'Character_12', 'Character_13', 'Character_14', 'Character_15', 'Character_16', 'Character_17', 'Character_18'];
 
 /* 속성 이름 · 아이콘 · 색 (기존 사이트 ELEMENT_INFO 와 같음) */
 G.DATA.elements = {
-  fire:      { name: '화염', icon: 'flame', color: '#a8482c' },
+  fire:      { name: '화염', icon: 'flame', color: '#b0402c' },
   earth:     { name: '대지', icon: 'earth', color: '#7d6440' },
-  water:     { name: '물',   icon: 'water', color: '#3f6e7e' },
+  water:     { name: '물',   icon: 'water', color: '#3d6496' },
   nature:    { name: '자연', icon: 'leaf',  color: '#5b7346' },
-  wind:      { name: '바람', icon: 'wind',  color: '#5f8580' },
-  lightning: { name: '번개', icon: 'bolt',  color: '#6a5a8c' },
+  wind:      { name: '바람', icon: 'wind',  color: '#7c7f84' },
+  lightning: { name: '번개', icon: 'bolt',  color: '#c99a1c' },
   light:     { name: '빛',   icon: 'sun',   color: '#b8924a' },
-  gold:      { name: '골드', icon: 'sun',   color: '#b8922a' },   // 패시브 [빛]: 블랙 속성 적에게 피해 +3% · 마력 분배
+  gold:      { name: '골드', icon: 'sun',   color: '#b8922a' },   // 패시브 [빛]: 블랙 속성 적에게 피해 +10% · 마력 분배
   black:     { name: '블랙', icon: 'moon',  color: '#2c2a36' }
 };
 
@@ -659,7 +742,7 @@ G.DATA.specialSkills = {
     category: '골드 속성 전용 · 패시브 생성 카드', type: 'buff', element: 'gold', anim: 'light_share', icon: 'sun', mp: 0,
     art: 'assets/characters/common/skill_light_share.svg',
     desc: '턴이 시작될 때 자동으로 사용되어, 자신이 축적한 마력을 필드의 아군 전체에게 균등하게 나누어 줍니다.',
-    note: '[빛] 골드 속성 패시브: 블랙 속성 적에게 주는 피해 +3% · 공격 스킬을 쓸 때마다 마력을 조금 흡수합니다.',
+    note: '[빛] 골드 속성 패시브: 블랙 속성 적에게 주는 피해 +10% · 공격 스킬을 쓸 때마다 마력을 조금 흡수합니다.',
     actions: []
   }
 };

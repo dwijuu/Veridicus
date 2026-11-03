@@ -132,7 +132,14 @@ G.icons = (function () {
     plug: '<path d="M8.6 2.6v4.6M15.4 2.6v4.6"/><path d="M6 7.2h12v3.6a6 6 0 0 1-12 0z"/><path d="M12 16.8v4.6"/>',
     cloud: '<path d="M7 15.4a4 4 0 0 1-.4-8 5.4 5.4 0 0 1 10.2 1.2 3.4 3.4 0 0 1 .4 6.8z"/><path d="M12.6 15.4 10.4 18.6h3l-2 3"/>',
     gear: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.6M12 18.8v2.6M2.6 12h2.6M18.8 12h2.6M5.4 5.4l1.8 1.8M16.8 16.8l1.8 1.8M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8"/><circle cx="12" cy="12" r="6.6"/>',
-    buster: '<circle cx="12" cy="12" r="3.4"/><path d="M12 2.4v4M12 17.6v4M2.4 12h4M17.6 12h4"/><path d="M5.6 5.6l2.4 2.4M16 16l2.4 2.4M18.4 5.6 16 8M8 16l-2.4 2.4"/>'
+    buster: '<circle cx="12" cy="12" r="3.4"/><path d="M12 2.4v4M12 17.6v4M2.4 12h4M17.6 12h4"/><path d="M5.6 5.6l2.4 2.4M16 16l2.4 2.4M18.4 5.6 16 8M8 16l-2.4 2.4"/>',
+    /* ── 체레스테 (예언 · 계약) ── */
+    prophecy: '<path d="M2.6 12C5.2 7.8 8.4 6 12 6s6.8 1.8 9.4 6c-2.6 4.2-5.8 6-9.4 6s-6.8-1.8-9.4-6z"/><path d="M12 8.6 13.6 12 12 15.4 10.4 12z"/><path d="M12 2.4v2M12 19.6v2"/>',
+    thread: '<path d="M4 19.6C8 16 6 12 10 10s6-6 10-6.6"/><path d="M4 14.4c3.4-1.6 4-4.6 7.4-5.8"/><circle cx="18.6" cy="17.4" r="2.6"/><path d="M15.4 20.6l1.4-1.4"/>',
+    mask: '<path d="M3.4 6.4c3 1.4 5.8 1.6 8.6 0 2.8 1.6 5.6 1.4 8.6 0v4.4c0 5-3.8 8.8-8.6 10.2-4.8-1.4-8.6-5.2-8.6-10.2z"/><path d="M7 11.6l2.6 1 2.4-1M12 11.6l2.4 1 2.6-1"/><path d="M9.6 16.4c1.6-.8 3.2-.8 4.8 0"/>',
+    hourglass: '<path d="M6 2.8h12M6 21.2h12"/><path d="M7.4 2.8c0 5 4.6 6.4 4.6 9.2S7.4 16.2 7.4 21.2M16.6 2.8c0 5-4.6 6.4-4.6 9.2s4.6 4.2 4.6 9.2"/><path d="M10 18.6h4"/>',
+    echo: '<circle cx="14.4" cy="12" r="6.4"/><path d="M9.4 6.4A6.4 6.4 0 0 0 9.4 17.6" stroke-dasharray="2 2.2"/><path d="M5.4 7.6A6.4 6.4 0 0 0 5.4 16.4" stroke-dasharray="1.6 2.4"/><path d="M14.4 8.8V12l2.2 1.6"/>',
+    contract: '<path d="M5.6 2.8h9.4l3.4 3.4v15H5.6z"/><path d="M8.6 8.4h6.8M8.6 11.6h6.8M8.6 14.8h3.6"/><circle cx="15.4" cy="17.6" r="2"/>'
   };
   function svg(key, cls) {
     return '<svg class="' + (cls || 'g-icon') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">' + (P[key] || P.burst) + '</svg>';

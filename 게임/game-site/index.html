@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STORY MODE // AGENT LIST</title>
+  <title>STORY MODE · AGENT LIST</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Sans+KR:wght@400;500;700;900&family=Gloock&family=Nanum+Myeongjo:wght@700;800&family=Noto+Serif+KR:wght@400;500;700;900&display=swap">
   <link rel="stylesheet" href="css/base.css">
@@ -15,10 +15,13 @@
   <link rel="stylesheet" href="css/v2.css">
   <link rel="stylesheet" href="css/mobile.css">
   <link rel="stylesheet" href="css/restyle.css">
+  <link rel="stylesheet" href="css/lesson.css">
+  <link rel="stylesheet" href="css/battle-flat.css">
 </head>
 <body>
   <!-- 사이트를 옮길 때 기록 공유 · 로딩 화면 (가장 먼저) -->
   <script src="js/core/sync.js"></script>
+  <script src="js/core/input.js"></script>
   <script src="js/core/loading.js"></script>
   <!-- 1920 x 920 고정 캔버스 (기존 사이트와 동일한 기준 해상도 · 균일 스케일) -->
   <div id="viewport">
@@ -53,6 +56,7 @@
   <script src="js/data/stories.js"></script>
   <script src="js/data/chapters.js"></script>
   <script src="js/data/substories.js"></script>
+  <script src="js/core/lesson.js"></script>
   <!-- 코어 -->
   <script src="js/core/util.js"></script>
   <script src="js/core/art.js"></script>
@@ -62,6 +66,7 @@
   <script src="js/core/sfx.js"></script>
   <script src="js/core/bgm.js"></script>
   <script src="js/core/settings.js"></script>
+  <script src="js/core/saveio.js"></script>
   <script src="js/core/router.js"></script>
   <!-- 시스템 (화면과 분리된 순수 게임 로직) -->
   <script src="js/systems/battle-engine.js"></script>
@@ -73,6 +78,7 @@
   <script src="js/screens/battle-fx.js"></script>
   <script src="js/screens/battle-ui.js"></script>
   <script src="js/screens/tutorial.js"></script>
+  <script src="js/screens/lesson.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

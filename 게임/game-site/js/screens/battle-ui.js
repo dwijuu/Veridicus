@@ -64,6 +64,8 @@
           seed: (sess.token || Date.now()) & 0xffffffff,
           fixedHand: useTutorial && tutKind === 'basic' ? ['arden_s1', 'arden_s2', 'arden_s1', 'arden_s1'] : null,   // 1스테이지: 3턴 안에 끝나도록 공격 카드 보장
           reserve: stage.reserve || null,
+          allyStart: stage.allyStart || null,
+          contract: sess.contract || null,   // 체레스테 계약자 (편성 화면에서 지정)
           finale: stage.finale ? { unit: stage.finale.unit, hpRatio: stage.finale.hpRatio, skill: G.DATA.enemies[stage.finale.unit].finaleSkill } : null
         });
 
@@ -98,7 +100,10 @@
         const turnRow = U.el('div', 'bt-hud-row');
         const fieldRow = U.el('div', 'bt-fields');
         /* 적 정보 버튼 (왼쪽 위) */
-        const btnIntel = U.el('button', 'bt-hud-row bt-hud-sub bt-intel-btn', { type: 'button', html: '<span>' + U.esc(stage.name) + ' // ' + U.esc((stage.objectives || ['모든 적 처치']).join(' · ')) + '</span><span class="bt-intel-ico">' + G.icons.svg('eye') + '<b>적 정보</b></span>' });
+        /*  스테이지 이름 · 목표는 글씨만, 오른쪽 [적 정보] 부분만 버튼 (누르기 · 색 변화도 이 부분만) */
+        const intelRow = U.el('div', 'bt-hud-row bt-hud-sub bt-intel-row', { html: '<span class="bt-intel-stage">' + U.esc(stage.name) + ' · ' + U.esc((stage.objectives || ['모든 적 처치']).join(' · ')) + '</span>' });
+        const btnIntel = U.el('button', 'bt-intel-ico', { type: 'button', 'aria-label': '적 정보', html: G.icons.svg('eye') + '<b>적 정보</b>' });
+        intelRow.appendChild(btnIntel);
         /* 증원 스테이지: 남은 적 수 (예: 훈련용 마법 더미 3 / 5) */
         const waveEl = U.el('div', 'bt-wave');
         function renderWave() {
@@ -107,7 +112,7 @@
           const nm = (G.DATA.enemies[stage.enemies[0]] || {}).name || '적';
           waveEl.innerHTML = '<span>' + U.esc(nm) + '</span><b>' + (st.totalFoes - left) + '</b><i>/ ' + st.totalFoes + '</i>';
         }
-        hudTL.append(turnRow, btnIntel, fieldRow, waveEl);
+        hudTL.append(turnRow, intelRow, fieldRow, waveEl);
         renderWave();
         s.appendChild(hudTL);
 
@@ -162,14 +167,16 @@
         s.append(handTray, handEl);
         /* 왼쪽 아래: 캐릭터 변경 버튼 + 대기석 */
         /* 오른쪽: [번개] 공유 스택 (레이 · 코루스코 편성 시) */
-        const boltEl = U.el('div', 'bt-bolt', { html: '<div class="bt-bolt-ico">' + G.icons.svg('bolt') + '<b class="bt-bolt-n">0</b></div><div class="bt-bolt-lab">번개</div>' });
+        /* 마름모 판 + 번개 문양, 숫자는 아래 (글자 라벨 없음) */
+        const BOLT_SVG = '<svg class="bt-bolt-mark" viewBox="0 0 64 64" aria-hidden="true"><path class="bd" d="M32 2 62 32 32 62 2 32z"/><path class="bl" d="M35.5 13 22 35h9l-3 16 14-22h-9z"/></svg>';
+        const boltEl = U.el('div', 'bt-bolt', { html: '<div class="bt-bolt-ico">' + BOLT_SVG + '</div><b class="bt-bolt-n">0</b>' });
         boltEl._tip = function () {
           return '<div class="tt-title">번개 <span class="tt-tag">' + st.bolt + '</span></div>파티가 함께 쓰는 번개 스택입니다. [찌릿]을 쌓거나 [찌릿]이 반응할 때, 번개 속성 아군이 스킬을 쓸 때 누적됩니다.' +
             '<div class="tt-sub">예열 스킬이 소모하고, 레이의 궁극기는 스택 1개당 피해량이 12% 증가한 뒤 모두 초기화합니다.</div>';
         };
         s.appendChild(boltEl);
         /* 왼쪽: 적 진영의 [번개] (보스 코루스코) */
-        const eBoltEl = U.el('div', 'bt-bolt is-enemy', { html: '<div class="bt-bolt-ico">' + G.icons.svg('bolt') + '<b class="bt-bolt-n">0</b></div><div class="bt-bolt-lab">적 번개</div>' });
+        const eBoltEl = U.el('div', 'bt-bolt is-enemy', { html: '<div class="bt-bolt-ico">' + BOLT_SVG + '</div><b class="bt-bolt-n">0</b>' });
         eBoltEl._tip = function () {
           return '<div class="tt-title">적 번개 <span class="tt-tag debuff">' + st.eBolt + '</span></div>적 진영이 쓰는 번개 스택입니다. 적이 과전압 예열을 쓸 때 소모합니다.';
         };
@@ -290,6 +297,7 @@
             r.root.style.left = ex[i] + 'px';
           });
           renderBench();
+          if (typeof renderBolt === 'function') renderBolt();
         }
 
         function statusTip(d, x) {
@@ -398,7 +406,9 @@
         /* [번개] 스택 표시 */
         let boltShown = -1;
         function renderBolt(e) {
-          boltEl.style.display = st.useBolt ? '' : 'none';
+          /* [번개]를 쓰는 캐릭터(레이 · 코루스코)가 필드에 출전 중일 때만 표시 (대기석에만 있으면 숨김 · 스택은 그대로 유지) */
+          const boltOnField = st.allies.some(function (u) { return G.DATA.characters[u.defId].usesBolt; });
+          boltEl.style.display = st.useBolt && boltOnField ? '' : 'none';
           eBoltEl.style.display = 'none';   // 적 진영 [번개]는 내부에서만 셈 (화면에 표시하지 않음)
           boltEl.querySelector('.bt-bolt-n').textContent = st.bolt;
           eBoltEl.querySelector('.bt-bolt-n').textContent = st.eBolt;
@@ -603,7 +613,26 @@
             n.style.setProperty('--fy', (Math.abs(d) * Math.abs(d) * 3).toFixed(1) + 'px');
             n.style.zIndex = String(i + 1);
           });
+          fitHand();
           renderSlots();
+        }
+        /* 카드가 많아지면(궁극기 카드 2장 이상 등) 왼쪽의 대기석 · 셔플 버튼과 겹치지 않도록 카드 간격을 좁힘 */
+        function fitHand() {
+          const cards = Array.prototype.slice.call(handEl.children);
+          cards.forEach(function (n) { n.style.marginLeft = ''; });
+          if (cards.length < 2 || !handEl.isConnected) return;
+          const hr = handEl.getBoundingClientRect(), br = benchWrap.getBoundingClientRect();
+          if (!hr.width || !handEl.offsetWidth) return;
+          const k = hr.width / handEl.offsetWidth;             // 화면 배율 × 모바일 확대
+          const limit = br.right + 18 * (G.util.getScale() || 1);
+          const over = limit - hr.left;
+          if (over <= 0) return;
+          const per = (over * 2 / k) / (cards.length - 1);   // 가운데 정렬이므로 줄인 폭의 절반만큼 왼쪽 끝이 들어옴
+          cards.forEach(function (n, i) {
+            if (!i) return;
+            const base = parseFloat(getComputedStyle(n).marginLeft) || 0;
+            n.style.marginLeft = (base - per) + 'px';
+          });
         }
 
         /* 행동 슬롯: 편성 인원 수만큼만 표시 (1명 = 1칸) */
@@ -702,35 +731,77 @@
           if (!d) return '#ffd75e';
           return u.side === 'ally' ? (d.themeColor || '#ffd75e') : (d.tint || '#c0392b');
         }
-        /* 궁극기 시네마틱: 궁극기마다 고유한 연출(battle-fx.js 의 CINE)을 전체 화면으로 보여 줌
-         *  · 위아래 레터박스 + 왼쪽 아래 작은 스킬 이름
-         *  · 적의 궁극기: 붉은 테두리 · 경고 줄무늬 · 'ENEMY ULTIMATE' 표시 */
+        /* 궁극기 컷인 (리버스 1999 풍): 종이(아군) · 먹(적) 바탕 → 속성 색 사선 판이 밀려 들어오고
+         *  캐릭터가 크게 → 스킬 이름이 왼쪽에서부터 써지듯 드러남 → 먹 판이 화면을 덮으며 전장으로 돌아감
+         *  · 테두리 · 그림자 · 빛 번짐 없이 평평한 판과 글씨만 · 스킬 이펙트는 이어서 전장에서 재생 */
+        function ultSlabColor(u, d) {
+          const el = (G.DATA.elements || {})[d && d.element];
+          if (!el || (d && d.element === 'black')) return u.side === 'enemy' ? '#8a2f22' : '#3a3644';
+          return el.color;
+        }
         async function ultCinematic(u, skill) {
           if (!u) return;
           const d = B.charDef(u);
           const enemy = u.side === 'enemy';
           G.tip.hide();   // 열려 있던 툴팁이 연출 위에 남지 않도록
-          const ov = U.el('div', 'bt-cine' + (enemy ? ' is-enemy' : ''));
-          const stageEl = U.el('div', 'bt-cine-stage');
-          ov.appendChild(stageEl);
-          ov.insertAdjacentHTML('beforeend',
-            '<div class="bt-cine-bar top">' + (enemy ? '<span>WARNING // ENEMY ULTIMATE</span>' : '') + '</div>' +
-            '<div class="bt-cine-bar bottom">' + (enemy ? '<span>WARNING // ENEMY ULTIMATE</span>' : '') + '</div>' +
-            (enemy ? '<div class="bt-cine-frame"></div>' : '') +
-            '<div class="bt-cine-label">' + (enemy ? '<b class="tag">적 궁극기</b>' : '') +
-              '<div class="nm">' + U.esc(skill.name) + '</div><div class="who">' + U.esc(u.name) + '</div></div>');
+          const k = 1 / speed, T = 3200 * k,   /* 전체 3.2초: 등장 속도는 그대로, 이름이 보이는 시간을 늘림 */
+            E = function (x) { return x * 0.625; }, dir = enemy ? -1 : 1;
+          const name = String(skill.name || '').replace(/^최종\s*술식\s*[-–—:]\s*/, '');
+          const art = enemy ? (d.sprite ? '<img src="' + (d.sprite.atk || d.sprite.base) + '" alt="">' : G.art.enemy(d, ''))
+            : '<img src="' + (d.images.battleAtk || d.images.battle || d.images.full) + '" alt="">';
+          const ov = U.el('div', 'ut' + (enemy ? ' is-enemy' : ''));
+          ov.style.setProperty('--ut', ultSlabColor(u, d));
+          ov.innerHTML =
+            '<div class="ut-base"></div><div class="ut-slab"></div><div class="ut-slab2"></div>' +
+            '<div class="ut-lines"><i style="top:12%"></i><i style="top:14.4%"></i><i style="top:90%"></i></div>' +
+            '<div class="ut-art">' + art + '</div>' +
+            '<div class="ut-text"><div class="ut-eyebrow">' + (enemy ? 'ENEMY ULTIMATE' : 'ULTIMATE') + '</div>' +
+              '<div class="ut-name" style="font-size:' + (name.length > 8 ? 76 : name.length > 6 ? 92 : 108) + 'px">' + U.esc(name) + '</div>' +
+              (skill.nameEn ? '<div class="ut-en">' + U.esc(skill.nameEn) + '</div>' : '') +
+              '<div class="ut-rule"></div><div class="ut-who">' + U.esc(u.name) + '</div></div>' +
+            '<div class="ut-wipe"></div>';
           s.appendChild(ov);
-          const k = 1 / speed;
-          ov.querySelector('.bt-cine-bar.top').animate([{ transform: 'translateY(-100%)' }, { transform: 'none', offset: 0.12 }, { transform: 'none', offset: 0.9 }, { transform: 'translateY(-100%)' }], { duration: 2400 * k, fill: 'both' });
-          ov.querySelector('.bt-cine-bar.bottom').animate([{ transform: 'translateY(100%)' }, { transform: 'none', offset: 0.12 }, { transform: 'none', offset: 0.9 }, { transform: 'translateY(100%)' }], { duration: 2400 * k, fill: 'both' });
-          ov.querySelector('.bt-cine-label').animate([{ opacity: 0, transform: 'translateX(-30px)' }, { opacity: 1, transform: 'none', offset: 0.2 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], { duration: 2400 * k, fill: 'both' });
-          const art = enemy ? (d.sprite ? { src: d.sprite.atk || d.sprite.base } : { sil: G.art.enemy(d, '') }) : { src: d.images.battleAtk || d.images.battle || d.images.full };   // 아군: 필드의 전투 그림과 같은 그림
-          try {
-            await Promise.all([
-              G.fx.cine(skill.anim, { layer: stageEl, speed: speed, signal: signal, art: art, color: ultColor(u), enemy: enemy }),
-              sleep(2200)
-            ]);
-          } finally { ov.remove(); }
+          const q = function (sel) { return ov.querySelectorAll(sel); };
+          const go = function (el, kf, o) { return el.animate(kf, Object.assign({ duration: T, fill: 'both' }, o || {})); };
+          const OUT = 'cubic-bezier(.16,.84,.24,1)';
+          const sk = enemy ? 'skewX(14deg)' : 'skewX(-14deg)';
+          go(ov, [{ opacity: 1 }, { opacity: 1, offset: 0.955 }, { opacity: 0 }]);
+          go(q('.ut-base')[0], [{ opacity: 0 }, { opacity: 1, offset: E(0.05) }, { opacity: 1 }]);
+          go(q('.ut-slab')[0], [{ transform: sk + ' translateX(' + (dir * 1400) + 'px)', easing: OUT }, { transform: sk, offset: E(0.16) }, { transform: sk + ' translateX(' + (-dir * 50) + 'px)' }]);
+          go(q('.ut-slab2')[0], [{ transform: sk + ' translateX(' + (dir * 1600) + 'px)', easing: OUT }, { transform: sk + ' translateX(' + (dir * 1600) + 'px)', offset: E(0.05), easing: OUT }, { transform: sk, offset: E(0.2) }, { transform: sk + ' translateX(' + (-dir * 70) + 'px)' }]);
+          go(q('.ut-art')[0], [{ transform: 'translateX(' + (dir * 420) + 'px)', opacity: 0, easing: OUT }, { transform: 'translateX(' + (dir * 420) + 'px)', opacity: 0, offset: E(0.06), easing: OUT }, { transform: 'none', opacity: 1, offset: E(0.24) }, { transform: 'translateX(' + (-dir * 60) + 'px)', opacity: 1 }]);
+          Array.prototype.forEach.call(q('.ut-lines i'), function (l, i) {
+            l.style.transformOrigin = enemy ? '100% 50%' : '0 50%';
+            go(l, [{ transform: 'scaleX(0)', easing: OUT }, { transform: 'scaleX(0)', offset: E(0.1 + i * 0.03), easing: OUT }, { transform: 'scaleX(1)', offset: E(0.3 + i * 0.03) }, { transform: 'scaleX(1)' }]);
+          });
+          const hid = enemy ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)';
+          [['.ut-eyebrow', 0.14], ['.ut-name', 0.2], ['.ut-en', 0.3], ['.ut-who', 0.36]].forEach(function (p) {
+            const el = q(p[0])[0];
+            if (el) go(el, [{ clipPath: hid, easing: OUT }, { clipPath: hid, offset: E(p[1]), easing: OUT }, { clipPath: 'inset(0 0 0 0)', offset: E(p[1] + 0.16) }, { clipPath: 'inset(0 0 0 0)' }]);
+          });
+          go(q('.ut-rule')[0], [{ transform: 'scaleX(0)', easing: OUT }, { transform: 'scaleX(0)', offset: E(0.3), easing: OUT }, { transform: 'scaleX(1)', offset: E(0.5) }, { transform: 'scaleX(1)' }]);
+          go(q('.ut-wipe')[0], [{ transform: 'scaleX(0)', easing: 'cubic-bezier(.7,0,.3,1)' }, { transform: 'scaleX(0)', offset: 0.875, easing: 'cubic-bezier(.7,0,.3,1)' }, { transform: 'scaleX(1)', offset: 0.95 }, { transform: 'scaleX(1)' }]);
+          try { await sleep(T); } finally { ov.remove(); }
+        }
+
+        /* 타격 순간: 맞은 캐릭터를 가로지르는 사선 컷 2줄 (공격한 쪽 속성 색) */
+        function slash(uid, fromUid) {
+          const p = point(uid, 'chest');
+          const a = B.find(st, fromUid), ad = a && B.charDef(a);
+          const col = ((G.DATA.elements || {})[ad && ad.element] || {}).color || '#b5562f';
+          const ang = (18 + Math.random() * 30) * (Math.random() < 0.5 ? -1 : 1);
+          [0, 1].forEach(function (i) {
+            const el = U.el('div', 'bt-slash');
+            el.style.left = (p.x + (i ? 14 : -10)) + 'px'; el.style.top = (p.y + (i ? 22 : -18)) + 'px';
+            el.style.setProperty('--slash', col);
+            fxLayer.appendChild(el);
+            const r = 'rotate(' + (ang + i * 7) + 'deg)';
+            el.animate([
+              { transform: r + ' scaleX(0)', opacity: 1 },
+              { transform: r + ' scaleX(1)', opacity: 1, offset: 0.4 },
+              { transform: r + ' scaleX(1) scaleY(0.2)', opacity: 0 }
+            ], { duration: 320 / speed, delay: i * 45 / speed, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'both' }).onfinish = function () { el.remove(); };
+          });
         }
 
         /* ── 텍스트 연출 ─────────────────────────────── */
@@ -895,6 +966,7 @@
                 if (e.source === 'zone') { G.fx.zoneTick(fxCtx(), e.unit); await sleep(250); }
                 addFocus(e.unit);
                 hit(e.unit);
+                if (e.source === 'skill' && e.from && !e.absorbed) slash(e.unit, e.from);
                 /* 피격음: 지속 피해는 작게, 치명타 · 큰 피해는 묵직하게 */
                 if (e.source === 'burn' || e.source === 'zone' || e.source === 'drip' || e.source === 'zap') G.sfx.play('hit', 0.5);
                 else G.sfx.play(e.crit || e.amount >= 250 ? 'hit_heavy' : 'hit');
@@ -912,6 +984,11 @@
                 renderBench();
                 break;
               }
+              case 'mpLoss':
+                floatText(e.unit, (e.label ? e.label + ' ' : '') + 'MP -' + e.amount, 'is-mp', 80);
+                updateUnit(B.find(st, e.unit));
+                renderBench();
+                break;
               case 'mpGain':
                 floatText(e.unit, (e.label ? e.label + ' ' : '') + 'MP +' + e.amount, 'is-mp', 80);
                 updateUnit(B.find(st, e.unit));
@@ -979,8 +1056,16 @@
                 break;
               case 'ult':
                 renderHand({ animate: true });
-                if (e.first) toast('궁극기 카드가 마법에 추가되었습니다!');
                 await sleep(500);
+                break;
+              case 'ultCharged':
+                /* 열의가 가득 참 → 카드는 다음 아군 턴이 시작될 때 마법에 추가 */
+                floatText(e.unit, '궁극기 준비', 'is-status buff', 40);
+                if (e.first) toast('궁극기 준비 완료 — 다음 아군 턴에 궁극기 카드가 추가됩니다.');
+                break;
+              case 'foresee':
+                floatText(e.unit, '미래 예언 ×' + e.value, 'is-status buff', 40);
+                await sleep(PACE.statusShow);
                 break;
               case 'enter':
               case 'swap':
@@ -1057,6 +1142,14 @@
             if (st.finalePending) return runFinale();
             if (B.outcome(st)) return finish();
             if (st.queue.length) await sleep(PACE.betweenActions);
+          }
+          /* ①-1 체레스테: 아군 공격이 끝나면 계약자가 [시간의 잔상] 현실화 */
+          const afterEv = B.afterAllyPhase(st);
+          if (afterEv.length) {
+            await sleep(PACE.betweenActions);
+            await play(afterEv);
+            if (st.finalePending) return runFinale();
+            if (B.outcome(st)) return finish();
           }
           renderHand();
 
@@ -1195,27 +1288,28 @@
               .find(function (x) { return x.requires === stage.id; });
             const nextWas = !!(next && G.save.isStageUnlocked(next.id));
             const chCand = G.DATA.chapters.filter(function (c) { return c.requires === stage.id && !G.save.isChapterUnlocked(c.id); });
-            G.save.markCleared(stage.id);
+            if (stage.lesson) G.lesson.recordClear(stage.lesson);   // 보충 수업: 이번 주 토벌 완료 · 오늘 남은 횟수 −1
+            else G.save.markCleared(stage.id);
             if (next && !nextWas && G.save.isStageUnlocked(next.id)) G.app.session.newlyUnlocked = next.id;
             const newCh = chCand.find(function (c) { return G.save.isChapterUnlocked(c.id); });
             if (newCh) G.app.session.newChapter = newCh.id;
             overlay.innerHTML = (st.scriptedWin
                 ? '<div class="bt-result-big">STAGE CLEAR</div><div class="bt-result-sub">전투 종료</div>'
                 : '<div class="bt-result-big">VICTORY</div><div class="bt-result-sub">전투 승리</div>') +
-              '<div class="bt-result-meta g-mono">' + U.esc(stage.name) + ' // ' + st.turn + ' TURNS</div>' +
+              '<div class="bt-result-meta g-mono">' + U.esc(stage.name) + ' · ' + st.turn + ' TURNS</div>' +
               (newCh ? '<div class="st-clear-new">' + U.esc(newCh.title) + ' 해금</div>' : '') +
-              '<div class="bt-result-hint">' + (stage.afterStory ? '화면을 클릭하면 이야기가 이어집니다' : '화면을 클릭하면 스테이지 화면으로 돌아갑니다') + '</div>';
+              '<div class="bt-result-hint">' + (stage.afterStory ? '화면을 클릭하면 이야기가 이어집니다' : stage.lesson ? '화면을 클릭하면 보충 수업 화면으로 돌아갑니다' : '화면을 클릭하면 스테이지 화면으로 돌아갑니다') + '</div>';
             let leaving = false;
             overlay.addEventListener('click', function () {
               if (leaving) return; leaving = true;
               ctx.clearBattleSession();
               /* 전투 후 이어지는 스토리가 있으면 먼저 스토리 → 끝나면 다음 스테이지 해금 */
-              ctx.go(stage.afterStory ? '#/stage/' + stage.id + '/after' : '#/chapter/' + stage.chapter);
+              ctx.go(stage.afterStory ? '#/stage/' + stage.id + '/after' : G.router.backOf(stage));
             });
           } else {
             /* 게임 오버: 필드 + 대기석까지 모두 기절 */
             overlay.innerHTML = '<div class="bt-result-big">GAME OVER</div><div class="bt-result-sub">모든 아군이 기절했습니다</div>' +
-              '<div class="bt-result-meta g-mono">' + U.esc(stage.name) + ' // ' + st.turn + ' TURNS</div>';
+              '<div class="bt-result-meta g-mono">' + U.esc(stage.name) + ' · ' + st.turn + ' TURNS</div>';
             const act = U.el('div', 'bt-result-actions');
             const retry = U.el('button', 'g-btn g-btn-primary', { type: 'button', text: '다시하기' });
             /* 다시하기: 덱 편성 화면으로 돌아가 편성을 확인 · 수정한 뒤 다시 전투 */
@@ -1224,7 +1318,7 @@
               ctx.go('#/stage/' + stage.id + '/formation');
             });
             const out = U.el('button', 'g-btn', { type: 'button', text: '돌아가기' });
-            out.addEventListener('click', function () { ctx.clearBattleSession(); ctx.go('#/chapter/' + stage.chapter); });
+            out.addEventListener('click', function () { ctx.clearBattleSession(); ctx.go(G.router.backOf(stage)); });
             act.append(out, retry);
             overlay.appendChild(act);
             overlay.style.cursor = 'default';
@@ -1237,7 +1331,7 @@
           const m = U.el('div', 'bt-modal');
           m.innerHTML = '<div class="bt-modal-box g-panel"><div class="bt-modal-title">ERROR</div><div class="bt-modal-text">전투 진행 중 문제가 발생했습니다.</div></div>';
           const b = U.el('button', 'g-btn g-btn-primary', { type: 'button', text: '스테이지 화면으로' });
-          b.addEventListener('click', function () { ctx.go('#/chapter/' + stage.chapter); });
+          b.addEventListener('click', function () { ctx.go(G.router.backOf(stage)); });
           m.firstChild.appendChild(b);
           s.appendChild(m);
         }
@@ -1278,7 +1372,7 @@
             const no = U.el('button', 'g-btn', { type: 'button', text: '아니오' });
             const yes = U.el('button', 'g-btn g-btn-primary', { type: 'button', text: '포기하기' });
             no.addEventListener('click', function () { m.remove(); setPaused(false); });
-            yes.addEventListener('click', function () { ctx.clearBattleSession(); ctx.go('#/chapter/' + stage.chapter); });
+            yes.addEventListener('click', function () { ctx.clearBattleSession(); ctx.go(G.router.backOf(stage)); });
             row.append(no, yes);
             box.appendChild(row);
           });
@@ -1386,6 +1480,17 @@
               '<p>' + U.esc(k.desc) + '</p></div></div>';
           }).join('');
         }
+        /* 패시브 · 특성 (메인화면 캐릭터 정보의 '특성'과 같은 내용) + 체레스테 계약자 */
+        function passiveRows(c, u) {
+          const list = (c.mechanics || []).slice();
+          const con = st.contractUid && B.find(st, st.contractUid);
+          if (c.contract && con) list.push({ name: '현재 계약자', icon: 'contract', desc: con.name + (con.alive ? '' : ' (기절 — 추가 공격 없음)') });
+          if (con && con.uid === u.uid) list.push({ name: '체레스테의 계약자', icon: 'contract', desc: '아군이 [예언] 상태의 적을 공격하면 이 캐릭터가 그 적에게 추가 공격합니다.' });
+          if (!list.length) return '';
+          return '<div class="bt-info-ps-h">패시브 · 특성</div><div class="bt-info-ps">' + list.map(function (m) {
+            return '<div class="bt-info-p' + (m.element ? ' is-' + m.element : '') + '"><span class="ico">' + G.icons.svg(m.icon || 'burst') + '</span><div><b>' + U.esc(m.name) + '</b><p>' + U.esc(m.desc) + '</p></div></div>';
+          }).join('') + '</div>';
+        }
         btnSkills.addEventListener('click', function () {
           const units = st.allies.concat(st.bench);
           infoModal('아군 스킬', units.map(function (u) {
@@ -1394,7 +1499,8 @@
               name: c.name, color: c.themeColor,
               pic: '<img src="' + (c.images.battle || c.images.full) + '" alt="">',
               html: '<div class="bt-info-head"><b>' + U.esc(c.name) + '</b><span>' + U.esc(c.role || '') + '</span></div>' +
-                skillRows(c.skills.concat([Object.assign({ ult: true }, c.ultimate, { desc: c.ultimate.desc + ' (열의 ' + (c.ultPoints || G.DATA.rules.MOXIE_MAX) + ' 필요)' })]))
+                skillRows(c.skills.concat([Object.assign({ ult: true }, c.ultimate, { desc: c.ultimate.desc + ' (열의 ' + (c.ultPoints || G.DATA.rules.MOXIE_MAX) + ' 필요)' })])) +
+                passiveRows(c, u)
             };
           }));
         });
@@ -1448,9 +1554,48 @@
           if (story && story.battleIntro) return showIntro(story.battleIntro, { center: true });
         }).then(function () {
           if (useTutorial) { tut = G.Tutorial.create(api, tutKind); refreshControls(); }
-          if (stage.battleHint && isStoryTeam && !useTutorial) setTimeout(function () { if (!signal.aborted) toast(stage.battleHint); }, 1600);
+          if (stage.battleHint && (isStoryTeam || stage.lesson) && !useTutorial) setTimeout(function () { if (!signal.aborted) toast(stage.battleHint); }, 1600);
+          return pickContract();
+        }).then(function () {
           return startPlayerPhase();
         }).catch(swallow);
+
+        /* 체레스테 [진실과 거짓의 계약]: 체레스테가 필드(1~3번)에 있으면 전투 시작 때 아군 아이콘 중 한 명을 눌러 계약자로 지정
+         *  · 자동 전투면 지난번 계약자(없으면 첫 번째 아군)로 바로 진행 */
+        function pickContract() {
+          const cel = st.allies.find(function (u) { return G.DATA.characters[u.defId].contract; });
+          if (!cel) return Promise.resolve();
+          const cands = st.allies.concat(st.bench).filter(function (u) { return u !== cel && u.alive; });
+          if (!cands.length) return Promise.resolve();
+          const saved = cands.find(function (u) { return u.defId === G.save.getContract(); });
+          if (auto) { B.setContract(st, (saved || cands[0]).uid); return Promise.resolve(); }
+          return new Promise(function (resolve) {
+            const ov = U.el('div', 'bt-contract');
+            const box = U.el('div', 'bt-contract-box');
+            box.innerHTML = '<div class="bt-contract-eyebrow">CONTRACT · 진실과 거짓의 계약</div>' +
+              '<div class="bt-contract-title">계약자를 고르세요</div>' +
+              '<p class="bt-contract-desc">체레스테의 [예언] 대상을 아군이 공격하면 [시간의 잔상]이 쌓이고, 아군의 공격이 끝나면 계약자가 추가 공격합니다.</p>';
+            const row = U.el('div', 'bt-contract-row');
+            cands.forEach(function (u) {
+              const c = G.DATA.characters[u.defId];
+              const b = U.el('button', 'bt-contract-pick' + (u === saved ? ' is-last' : ''), { type: 'button', 'data-sfx': 'ui_confirm' });
+              b.style.setProperty('--card-color', c.themeColor);
+              b.innerHTML = '<span class="pic"><img' + (c.images.battle ? ' class="is-sprite"' : '') + ' src="' + (c.images.battle || c.images.full) + '" alt=""></span>' +
+                '<b>' + U.esc(c.name) + '</b><small>' + (st.bench.indexOf(u) !== -1 ? '대기' : (u === saved ? '지난 계약자' : '출전')) + '</small>';
+              b.addEventListener('click', function () {
+                B.setContract(st, u.uid);
+                G.save.setContract(u.defId);
+                ov.remove();
+                toast(c.name + ' — 계약 체결');
+                resolve();
+              });
+              row.appendChild(b);
+            });
+            box.appendChild(row);
+            ov.appendChild(box);
+            s.appendChild(ov);
+          });
+        }
 
         /* opts.center: 화면 가운데 + 뒤에 반투명 검은 막 (STAGE 08 결말 대사처럼 눈에 띄어야 할 때) */
         function showIntro(line, opts) {

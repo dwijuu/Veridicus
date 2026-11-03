@@ -240,8 +240,43 @@ G.fx = (function () {
       { opacity: 0.6, offset: 0.7 }, { opacity: 0 }
     ], dur || 420, { delay: delay || 0, easing: 'linear' });
   }
+  /* 평면 먹선: 두 점을 잇는 가는 선이 그어졌다 사라짐 (체레스테 · 계약 추가 공격) */
+  function inkLine(ctx, a, b, color, width, dur, delay) {
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('class', 'fx fx-svg');
+    svg.setAttribute('viewBox', '0 0 1920 920');
+    const ln = document.createElementNS(SVGNS, 'line');
+    ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y); ln.setAttribute('x2', b.x); ln.setAttribute('y2', b.y);
+    ln.setAttribute('stroke', color); ln.setAttribute('stroke-width', width || 2);
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    ln.setAttribute('stroke-dasharray', len); ln.setAttribute('stroke-dashoffset', len);
+    svg.appendChild(ln);
+    ctx.layer.appendChild(svg);
+    run(ctx, ln, [{ strokeDashoffset: len }, { strokeDashoffset: 0, offset: 0.55 }, { strokeDashoffset: -len }], dur || 400, { delay: delay || 0, easing: 'cubic-bezier(.6,0,.2,1)', keep: true });
+    return run(ctx, svg, [{ opacity: 1 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], dur || 400, { delay: delay || 0, easing: 'linear' });
+  }
+  /* 마름모 표식 (예언 · 계약) */
+  function mark(ctx, p, color, delay, scale) {
+    const m = spawn(ctx, 'fx-mark', p.x, p.y, 'border-color:' + color + ';');
+    return run(ctx, m, [
+      { transform: 'translate(-50%,-50%) rotate(45deg) scale(0.2)', opacity: 0 },
+      { transform: 'translate(-50%,-50%) rotate(45deg) scale(1)', opacity: 1, offset: 0.3 },
+      { transform: 'translate(-50%,-50%) rotate(45deg) scale(' + (scale || 1.3) + ')', opacity: 0 }
+    ], 620, { delay: delay || 0 });
+  }
+  /* 사선 컷 두 줄 */
+  function slashes(ctx, p, color, delay) {
+    return Promise.all([-1, 1].map(function (k, i) {
+      const s = spawn(ctx, 'fx-cut', p.x + k * 14, p.y + k * 10, 'background:' + color + ';');
+      return run(ctx, s, [
+        { transform: 'translate(-50%,-50%) rotate(-32deg) scaleX(0)', opacity: 1 },
+        { transform: 'translate(-50%,-50%) rotate(-32deg) scaleX(1)', opacity: 1, offset: 0.4 },
+        { transform: 'translate(-50%,-50%) rotate(-32deg) scaleX(1) translateX(30px)', opacity: 0 }
+      ], 420, { delay: (delay || 0) + i * 70 });
+    }));
+  }
   function spark(ctx, p, color, n, dist) { return sparks(ctx, p.x, p.y, n || 10, dist || 110, 'fx-spark is-volt', 420); }
-  const VOLT = '#b9a8ff', GOLD = '#ffd75e';
+  const VOLT = '#ffe27a', GOLD = '#ffd75e';
 
   const FX_EXTRA = {};
   /* ══ 궁극기 시네마틱 ═══════════════════════════════════
@@ -363,12 +398,12 @@ G.fx = (function () {
       bg(c, 'background:radial-gradient(ellipse at 40% 50%,#2a1a5a 0%,#0b0620 70%);');
       cArt(c, 420, 980, 860);
       const o = { x: 860, y: 470 };
-      for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2; bolt(c, { x: o.x + Math.cos(a) * 700, y: o.y + Math.sin(a) * 420 }, o, '#b9a8ff', 3, 380, i * 60, 30); }
+      for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2; bolt(c, { x: o.x + Math.cos(a) * 700, y: o.y + Math.sin(a) * 420 }, o, '#ffe27a', 3, 380, i * 60, 30); }
       const orb = spawn(c, 'fx-volt-orb', o.x, o.y, 'width:240px;height:240px;');
       await run(c, orb, [{ transform: 'translate(-50%,-50%) scale(0.1)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: 0.8 }, { transform: 'translate(-50%,-50%) scale(0.85)', opacity: 1 }], 1000, { keep: true });
       const beam = spawn(c, 'fx-volt-beam', 1400, o.y, 'width:1300px;height:200px;');
       run(c, beam, [{ transform: 'translate(-50%,-50%) scaleY(0.05)', opacity: 0 }, { transform: 'translate(-50%,-50%) scaleY(1)', opacity: 1, offset: 0.2 }, { transform: 'translate(-50%,-50%) scaleY(0.05)', opacity: 0 }], 800);
-      bolt(c, o, { x: 1920, y: o.y }, '#b9a8ff', 10, 700, 0, 40);
+      bolt(c, o, { x: 1920, y: o.y }, '#ffe27a', 10, 700, 0, 40);
       stageShake(c, 16); flashC(c, '#e6deff', 0.8);
       await wait(c, 300); orb.remove();
       await wait(c, 300);
@@ -750,11 +785,11 @@ G.fx = (function () {
     /* ── 레이 (번개) ── */
     volt_shot: async function (ctx, e) {
       const m = ctx.point(e.actor, 'muzzle'), t = ctx.point(e.targets[0], 'chest');
-      glow(ctx, e.actor, 'rgba(185,168,255,0.95)', 600);
+      glow(ctx, e.actor, 'rgba(255,226,122,0.95)', 600);
       cburst(ctx, m.x, m.y, VOLT, 1.2, 380, 50);
       await wait(ctx, 260);
       recoil(ctx, e.actor);
-      shot(ctx, m, t, '#f4f0ff', 'rgba(150,120,255,0.9)', 360, 70);
+      shot(ctx, m, t, '#fffbea', 'rgba(250,200,60,0.9)', 360, 70);
       bolt(ctx, m, t, VOLT, 4, 420, 60);
       await wait(ctx, 380);
       ctx.shake(5);
@@ -764,14 +799,14 @@ G.fx = (function () {
     },
     overcharge: async function (ctx, e) {
       const m = ctx.point(e.actor, 'muzzle');
-      glow(ctx, e.actor, 'rgba(185,168,255,1)', 1100);
+      glow(ctx, e.actor, 'rgba(255,226,122,1)', 1100);
       ring(ctx, m.x, m.y, VOLT, 1.6, 600);
       await wait(ctx, 420);
       recoil(ctx, e.actor);
       e.targets.forEach(function (uid, i) {
         const t = ctx.point(uid, 'chest');
         bolt(ctx, m, t, VOLT, 6, 620, i * 70, 34);
-        bolt(ctx, m, { x: t.x, y: t.y + 40 }, '#8a6cff', 3, 560, 60 + i * 70, 40);
+        bolt(ctx, m, { x: t.x, y: t.y + 40 }, '#e2b31c', 3, 560, 60 + i * 70, 40);
       });
       await wait(ctx, 300);
       ctx.shake(8);
@@ -780,7 +815,7 @@ G.fx = (function () {
     },
     hyper_charge: async function (ctx, e) {
       const c = ctx.point(e.actor, 'chest'), f = ctx.point(e.actor, 'feet');
-      glow(ctx, e.actor, 'rgba(185,168,255,1)', 1500);
+      glow(ctx, e.actor, 'rgba(255,226,122,1)', 1500);
       const ps = [];
       for (let i = 0; i < 7; i++) {
         const a = Math.random() * Math.PI * 2, r = 220;
@@ -794,7 +829,7 @@ G.fx = (function () {
     },
     thunder_buster: async function (ctx, e) {
       const m = ctx.point(e.actor, 'muzzle'), c = ctx.point(e.actor, 'chest');
-      glow(ctx, e.actor, 'rgba(185,168,255,1)', 1800);
+      glow(ctx, e.actor, 'rgba(255,226,122,1)', 1800);
       dim(ctx, 'rgba(8,4,30,0.72)', 3200);
       for (let i = 0; i < 6; i++) {
         const a = Math.random() * Math.PI * 2;
@@ -1277,6 +1312,51 @@ G.fx = (function () {
       ctx.shake(6);
       e.targets.forEach(function (uid) { const p = ctx.point(uid, 'chest'); cburst(ctx, p.x, p.y, '#ffe9a8', 2, 500); });
       await wait(ctx, 450);
+    },
+
+    /* ── 체레스테 (가짜 예언자) : 먹선 · 마름모 표식 ── */
+    fate_thread: async function (ctx, e) {
+      const a = ctx.point(e.actor, 'chest'), t = ctx.point(e.targets[0], 'chest');
+      lunge(ctx, e.actor, 1);
+      await wait(ctx, 220);
+      await inkLine(ctx, a, t, '#efe8dc', 3, 380);
+      ctx.shake(5);
+      knock(ctx, e.targets[0], 26);
+      mark(ctx, t, '#b5562f', 0);
+      await slashes(ctx, t, '#efe8dc');
+    },
+    future_proxy: async function (ctx, e) {
+      const a = ctx.point(e.actor, 'chest');
+      await wait(ctx, 200);
+      await Promise.all(e.targets.map(function (uid, i) {
+        const p = ctx.point(uid, 'chest');
+        inkLine(ctx, a, p, '#b5562f', 2, 360, i * 80);
+        return mark(ctx, p, '#efe8dc', 200 + i * 80, 1.6);
+      }));
+    },
+    false_future: async function (ctx, e) {
+      dim(ctx, 'rgba(20,18,26,0.45)', 1500);
+      await wait(ctx, 300);
+      ctx.shake(7);
+      await Promise.all(e.targets.map(function (uid, i) {
+        const p = ctx.point(uid, 'chest');
+        knock(ctx, uid, 20);
+        slashes(ctx, p, '#efe8dc', i * 90);
+        return mark(ctx, p, '#b5562f', 120 + i * 90);
+      }));
+    },
+    destined_end: async function (ctx, e) {
+      dim(ctx, 'rgba(20,18,26,0.55)', 1800);
+      await wait(ctx, 250);
+      const a = ctx.point(e.actor, 'chest');
+      ctx.shake(10);
+      await Promise.all(e.targets.map(function (uid, i) {
+        const p = ctx.point(uid, 'chest');
+        inkLine(ctx, a, p, '#efe8dc', 3, 340, i * 70);
+        knock(ctx, uid, 30);
+        slashes(ctx, p, '#b5562f', 200 + i * 70);
+        return mark(ctx, p, '#efe8dc', 260 + i * 70, 1.8);
+      }));
     },
 
     /* 적 공격: 검은 형체가 달려들어 할퀴기 */

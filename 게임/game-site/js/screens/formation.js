@@ -146,8 +146,13 @@
         '<article class="dt-sk-detail"></article>' +
         '<div class="dt-h">특성 <em>Trait</em></div>' +
         '<ul class="dt-traits">' + (c.mechanics || []).map(function (m) {
-          return '<li><span class="mc-ico">' + G.icons.svg(m.icon || 'burst') + '</span><div><b>' + U.esc(m.name) + '</b><p>' + U.esc(m.desc) + '</p></div></li>';
+          return '<li' + (m.element ? ' class="is-elem is-' + m.element + '"' : '') + '><span class="mc-ico">' + G.icons.svg(m.icon || 'burst') + '</span><div><b>' + U.esc(m.name) + '</b><p>' + U.esc(m.short || m.desc) + '</p></div></li>';
         }).join('') + '</ul>';
+      /* 특성 카드: 한 줄 요약만 보이고, 자세한 설명은 툴팁 */
+      Array.prototype.forEach.call(right.querySelectorAll('.dt-traits li'), function (li, i) {
+        const m = c.mechanics[i];
+        li._tip = function () { return '<div class="tt-title">' + U.esc(m.name) + '</div>' + U.esc(m.desc); };
+      });
 
       const list = c.skills.concat([c.ultimate]).filter(Boolean);
       const box = right.querySelector('.dt-sk-list'), det = right.querySelector('.dt-sk-detail');
@@ -208,11 +213,11 @@
           '<div class="g-hall-pillar" style="left:22%"></div><div class="g-hall-pillar" style="left:62%"></div></div>';
 
         const top = U.el('div', 'g-topbar');
-        const back = U.el('button', 'g-back', { type: 'button', html: U.svgIcon('i-back') + '<span>STAGE</span>' });
-        back.addEventListener('click', function () { ctx.go('#/chapter/' + stage.chapter); });
+        const back = U.el('button', 'g-back', { type: 'button', html: U.svgIcon('i-back') + '<span>' + (stage.lesson ? 'LESSON' : 'STAGE') + '</span>' });
+        back.addEventListener('click', function () { ctx.go(G.router.backOf(stage)); });
         const setBtn = G.settings.button(s);
         setBtn.classList.add('fm-set-btn');
-        top.append(back, U.el('div', 'g-badge', { html: '<span class="num">03.</span><span>FORMATION // ' + U.esc(stage.name) + '</span>' }), setBtn);
+        top.append(back, G.homeButton(), U.el('div', 'g-badge', { html: '<span class="num">03.</span><span>FORMATION · ' + U.esc(stage.name) + '</span>' }), setBtn);
         s.appendChild(top);
 
         /* 왼쪽: 목표 / 적 */
@@ -220,7 +225,7 @@
         const enemyCounts = {};
         stage.enemies.forEach(function (id) { enemyCounts[id] = (enemyCounts[id] || 0) + 1; });
         info.innerHTML =
-          '<div class="fm2-eyebrow">BRIEFING // ' + U.esc(stage.name) + (stage.tutorial ? ' · TUTORIAL' : '') + '</div>' +
+          '<div class="fm2-eyebrow">BRIEFING · ' + U.esc(stage.name) + (stage.tutorial ? ' · TUTORIAL' : '') + '</div>' +
           '<div class="fm2-title">' + U.esc(stage.subtitle || stage.name) + '</div>' +
           '<div class="fm2-rule"></div>' +
           '<div class="fm-sec"><div class="fm-sec-h">목표</div><ul class="fm-obj">' +
@@ -231,6 +236,11 @@
               return '<div class="fm-enemy' + (ed.sprite ? ' has-sprite' : '') + '">' + (ed.sprite ? '<img src="' + ed.sprite.base + '" alt="">' : G.art.enemy(ed, '')) + (enemyCounts[id] > 1 ? '<span class="fm-enemy-count">×' + enemyCounts[id] + '</span>' : '') + '</div>';
             }).join('') + '</div>' +
             '<div class="fm-enemy-names">' + Object.keys(enemyCounts).map(function (id) { return U.esc(G.DATA.enemies[id].name); }).join(' · ') + '</div></div>' +
+          /* 보충 수업 주간 토벌: 시작할 때 아군에게 걸리는 디버프 */
+          (stage.allyStart ? '<div class="fm-sec"><div class="fm-sec-h">시작 효과</div><ul class="fm-obj">' + stage.allyStart.map(function (a) {
+            const d = G.DATA.statuses[a.status] || {};
+            return '<li><b>[' + U.esc(d.name || a.status) + ']</b> ' + U.esc(d.short || '') + '</li>';
+          }).join('') + '</ul></div>' : '') +
           '';
         s.appendChild(info);
         /* 적 아이콘에 마우스를 올리면 그 적의 스킬 · 궁극기 */
@@ -439,7 +449,7 @@
         startBtn.addEventListener('click', function () {
           if (!team.some(Boolean)) return;
           startBtn.disabled = true;   // 중복 클릭 방지
-          ctx.setBattleSession({ stageId: stage.id, team: team.slice(), token: Date.now() });
+          ctx.setBattleSession({ stageId: stage.id, team: team.slice(), contract: G.save.getContract(), token: Date.now() });
           ctx.go('#/stage/' + stage.id + '/battle');
         });
 

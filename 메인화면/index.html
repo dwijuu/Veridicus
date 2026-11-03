@@ -17,10 +17,12 @@
   <link rel="stylesheet" href="code/css/select.css">
   <link rel="stylesheet" href="code/css/detail.css">
   <link rel="stylesheet" href="code/css/records.css">
+  <link rel="stylesheet" href="code/css/notice.css">
 </head>
 <body>
   <!-- 사이트를 옮길 때 기록 공유 · 로딩 화면 (가장 먼저) -->
   <script src="../게임/game-site/js/core/sync.js"></script>
+  <script src="../게임/game-site/js/core/input.js"></script>
   <script src="../게임/game-site/js/core/loading.js"></script>
   <div id="viewport">
     <div id="stage" class="g-canvas cx-canvas">
@@ -46,7 +48,7 @@
 
         <!-- 왼쪽 세로 메뉴 (아이콘 + 이름) -->
         <nav class="lb-side" aria-label="소식">
-          <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="notice"></span><span>공지</span></button>
+          <button type="button" class="lb-ico-btn" id="lb-notice"><span class="lb-ico" data-icon="notice"></span><span>공지</span></button>
           <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="mail"></span><span>우편</span></button>
           <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="event"></span><span>이벤트</span></button>
           <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="shop"></span><span>상점</span></button>
@@ -72,11 +74,11 @@
           </button>
           <button type="button" class="lb-card lb-card-training" data-locked>
             <span class="lb-card-img" data-card="training"></span>
-            <span class="lb-card-tag">4일</span>
             <span class="lb-card-txt"><em>TRAINING</em><b>훈련장</b></span>
           </button>
-          <button type="button" class="lb-card lb-card-lesson" data-locked>
+          <button type="button" class="lb-card lb-card-lesson" id="btn-lesson">
             <span class="lb-card-img" data-card="lesson"></span>
+            <span class="lb-card-tag" id="lb-lesson-left" aria-label="주간 토벌 초기화까지 남은 시간"></span>
             <span class="lb-card-txt"><em>LESSON</em><b>보충 수업</b></span>
           </button>
           <button type="button" class="lb-card lb-card-recruit" data-locked>
@@ -104,7 +106,7 @@
           <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="friends"></span><span>친구</span></button>
           <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="trophy"></span><span>업적</span></button>
           <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="guild"></span><span>길드</span></button>
-          <button type="button" class="lb-ico-btn" data-locked><span class="lb-ico" data-icon="guide"></span><span>가이드</span></button>
+          <button type="button" class="lb-ico-btn" id="lb-guide"><span class="lb-ico" data-icon="guide"></span><span>가이드</span></button>
         </nav>
       </section>
 
@@ -318,18 +320,21 @@
   <script src="../게임/game-site/js/data/statuses.js"></script>
   <script src="../게임/game-site/js/data/characters.js"></script>
   <script src="../게임/game-site/js/data/chapters.js"></script>
+  <script src="../게임/game-site/js/core/lesson.js"></script>
   <script src="../게임/game-site/js/core/util.js"></script>
   <script src="../게임/game-site/js/core/art.js"></script>
   <script src="../게임/game-site/js/core/save.js"></script>
   <script src="../게임/game-site/js/core/tooltip.js"></script>
   <script src="../게임/game-site/js/core/line-icons.js"></script>
   <script src="../게임/game-site/js/core/settings.js"></script>
+  <script src="../게임/game-site/js/core/saveio.js"></script>
   <!-- 메인화면 -->
   <script src="code/js/data.js"></script>
   <script src="code/js/audio.js"></script>
   <script src="code/js/icons.js"></script>
   <script src="code/js/player.js"></script>
   <script src="code/js/records.js"></script>
+  <script src="code/js/notice.js"></script>
   <script src="code/js/app.js"></script>
   <script src="code/js/burn.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>

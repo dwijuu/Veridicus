@@ -12,39 +12,27 @@
   const EMBLEM = '<svg class="cs-emblem" viewBox="0 0 200 200" aria-hidden="true"><g fill="none" stroke="currentColor"><circle cx="100" cy="100" r="86" stroke-width="1.4"/><circle cx="100" cy="100" r="78" stroke-width="0.7" stroke-dasharray="2 5"/><path d="M100 14l18 60 60 26-60 26-18 60-18-60-60-26 60-26z" stroke-width="1.6"/><path d="M100 46l9 36 37 18-37 18-9 36-9-36-37-18 37-18z" stroke-width="1"/><circle cx="100" cy="100" r="10" fill="currentColor" stroke="none"/><path d="M39 39l18 18M161 39l-18 18M39 161l18-18M161 161l-18-18" stroke-width="1"/></g></svg>';
   function roman(n) { return ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][n - 1] || String(n); }
 
+  /* 표지(선택된 챕터) = 책.png · 옆면 = 책등.png (게임/배경 → assets/book/ 에 배경을 지운 그림) */
   function cover(ch, isNew) {
     const wrap = U.el('div', 'cs-cover-wrap');
-    const body = U.el('div', 'cs-tape-body');
-    const btn = U.el('button', 'cs-cover', { type: 'button', 'aria-label': ch.title + ' 입장' });
-    const hero = G.DATA.characters.Character_05;
-    const kind = ch.stages.every(function (id) { return G.DATA.stages[id] && G.DATA.stages[id].storyOnly; }) ? 'STORY ONLY' : 'STORY';
+    const btn = U.el('button', 'cs-book', { type: 'button', 'aria-label': ch.title + ' 입장' });
     btn.innerHTML =
-      '<div class="cs-cover-top"><span>✦ CHRONICLE ✦</span><span></span></div>' +
-      '<div class="cs-cover-art">' + EMBLEM + '<div class="cs-cover-roman">' + roman(ch.no) + '</div></div>' +   // 캐릭터 그림 대신 금빛 문장
-      '<div class="cs-cover-num">' + roman(ch.no) + '</div>' +
-      /* 챕터의 모든 스테이지를 클리어하면: 책 오른쪽 위에 걸린 책갈피 끈 */
+      '<img class="cs-book-img" src="assets/book/book.webp" alt="">' +
+      '<span class="cs-book-no">' + (ch.available ? 'CHAPTER ' + pad(ch.no) : 'VOLUME ' + roman(ch.no)) + '</span>' +
+      /* 챕터의 모든 스테이지를 클리어하면 CLEAR 표시 */
       (ch.stages.length && ch.stages.every(function (id) { return G.save.isCleared(id); }) ? '<div class="cs-cover-clear" title="모든 스테이지 클리어">CLEAR</div>' : '') +
-      (isNew ? '<div class="cs-new-flag">NEW</div>' : '') +
-      '<div class="cs-cover-bottom">' +
-        '<div class="cs-cover-title">' + U.esc(ch.title) + '</div>' +
-        '<div class="cs-cover-sub">VOLUME ' + roman(ch.no) + ' · ' + (ch.stages.length ? ch.stages.length + ' STAGE' + (ch.stages.length > 1 ? 'S' : '') : 'COMING SOON') + '</div>' +
-        '<div class="cs-cover-meta"><span class="g-barcode"></span><span class="vhs">VHS</span></div>' +
-      '</div>';
-    wrap.appendChild(body);
+      (isNew ? '<div class="cs-new-flag">NEW</div>' : '');
     wrap.appendChild(btn);
     return { wrap: wrap, btn: btn };
   }
 
   function spine(ch, unlocked, isNew) {
     /* 잠긴 챕터도 눌러서 표지는 볼 수 있음 (표지는 흐리게 · 입장 불가) */
-    const n = U.el('button', 'cs-spine' + (unlocked ? ' is-open' : ' is-locked'), { type: 'button', 'aria-label': ch.title + ' 선택' });
+    const n = U.el('button', 'cs-bspine' + (unlocked ? ' is-open' : ' is-locked'), { type: 'button', 'aria-label': ch.title + ' 선택' });
     n.innerHTML =
-      '<div class="cs-spine-band" style="' + (unlocked ? 'background:' + COVER_COLOR[(ch.no - 1) % COVER_COLOR.length] : '') + '"></div>' +
-      '<div class="cs-spine-label"><span>' + U.esc(ch.title) + '</span></div>' +
-      '<div class="cs-spine-num">' + roman(ch.no) + '</div>' +
-      '<div class="cs-spine-vhs">VHS</div>' +
-      '<div class="g-barcode"></div>' +
-      (unlocked ? '' : '<div class="cs-spine-lock">' + U.svgIcon('i-lock') + '</div>') +
+      '<img src="assets/book/spine.webp" alt="">' +
+      '<span class="cs-bspine-no">' + roman(ch.no) + '</span>' +
+      (unlocked ? '' : '<span class="cs-bspine-lock">' + U.svgIcon('i-lock') + '</span>') +
       (isNew ? '<div class="cs-new-flag">NEW</div>' : '');
     return n;
   }
@@ -114,71 +102,8 @@
     show(0);
   }
 
-  /* ── 기록 내보내기 · 불러오기 ─────────────────────────── */
-  function ioModal(s, title, html, buttons) {
-    const old = s.querySelector('.cs-io'); if (old) old.remove();
-    const m = U.el('div', 'cs-rec cs-io');
-    const box = U.el('div', 'cs-rec-box cs-io-box g-panel', { html: '<div class="cs-rec-title">' + U.esc(title) + '</div><div class="cs-io-text">' + html + '</div>' });
-    const row = U.el('div', 'cs-io-actions');
-    buttons.forEach(function (b) {
-      const el = U.el('button', 'g-btn' + (b.primary ? ' g-btn-primary' : ''), { type: 'button', text: b.text });
-      el.addEventListener('click', function () { m.remove(); if (b.onClick) b.onClick(); });
-      row.appendChild(el);
-    });
-    box.appendChild(row);
-    m.appendChild(box);
-    m.addEventListener('click', function (e) { if (e.target === m) m.remove(); });
-    s.appendChild(m);
-  }
-  function stamp() {
-    const d = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
-    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
-  }
-  function exportSave(s) {
-    try {
-      const blob = new Blob([JSON.stringify(G.save.exportData(), null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'game-save_' + stamp() + '.json';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-      ioModal(s, '기록 내보내기', '클리어한 스테이지 <b>' + G.save.clearedCount() + '개</b>와 편성 · 설정을 파일로 저장했습니다.<br>다른 곳에서 <b>불러오기</b>로 이 파일을 고르면 이어서 할 수 있습니다.', [{ text: '확인', primary: true }]);
-    } catch (e) {
-      ioModal(s, '기록 내보내기', '파일을 만들지 못했습니다. (' + U.esc(e.message) + ')', [{ text: '확인', primary: true }]);
-    }
-  }
-  function pickImport(s) {
-    const input = document.createElement('input');
-    input.type = 'file'; input.accept = '.json,application/json';
-    input.addEventListener('change', function () {
-      const f = input.files && input.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = function () {
-        let obj;
-        try { obj = JSON.parse(String(r.result)); } catch (e) { obj = null; }
-        if (!obj) { ioModal(s, '기록 불러오기', '파일을 읽을 수 없습니다. 내보내기로 만든 .json 파일인지 확인해 주세요.', [{ text: '확인', primary: true }]); return; }
-        const n = obj.save && obj.save.cleared ? Object.keys(obj.save.cleared).filter(function (k) { return k.indexOf(':') === -1; }).length : '?';
-        ioModal(s, '기록 불러오기', '<b>' + U.esc(f.name) + '</b><br>이 파일의 기록(클리어 ' + n + '개)으로 <b>지금 기록을 덮어씁니다.</b> 계속할까요?', [
-          { text: '취소' },
-          { text: '불러오기', primary: true, onClick: function () {
-            try {
-              const res = G.save.importData(obj);
-              ioModal(s, '기록 불러오기', '기록을 불러왔습니다. (클리어한 스테이지 ' + res.cleared + '개)', [{ text: '확인', primary: true, onClick: function () { location.reload(); } }]);
-            } catch (e) {
-              ioModal(s, '기록 불러오기', U.esc(e.message), [{ text: '확인', primary: true }]);
-            }
-          } }
-        ]);
-      };
-      r.readAsText(f);
-    });
-    input.click();
-  }
-
   G.deckRec = openDeckRec;
-  /* 설정 창(js/core/settings.js)의 기록 내보내기 · 불러오기에서 사용 */
-  G.saveIO = { exportSave: exportSave, pickImport: pickImport };   // 스테이지 선택 화면(chapter-map.js)의 '덱 추천' 버튼에서 사용
+  /* 기록 내보내기 · 불러오기는 js/core/saveio.js (G.saveIO) */
 
   G.router.register('select', function () {
     return {
@@ -186,20 +111,20 @@
         const s = U.el('section', 'g-screen cs-screen g-fade-in');
         s.innerHTML =
           '<div class="g-bg-grid"></div><div class="g-hash"></div>' +
-          '<div class="cs-label-bl"><span class="g-barcode"></span><span class="g-mono">CTL-00122 // STORY</span></div>' +
+          '<div class="cs-label-bl"><span class="g-barcode"></span><span class="g-mono">CTL-00122 · STORY</span></div>' +
           '<div class="cs-label-br g-mono">SELECT A VOLUME</div>';
 
         const top = U.el('div', 'g-topbar');
         const back = U.el('button', 'g-back', { type: 'button', html: U.svgIcon('i-back') + '<span>LOBBY</span>' });
         back.addEventListener('click', function () { G.app.toLobby(); });
-        const badge = U.el('div', 'g-badge', { html: '<span class="num">01.</span><span>STORY // CHRONICLES</span>' });
+        const badge = U.el('div', 'g-badge', { html: '<span class="num">01.</span><span>STORY · CHRONICLES</span>' });
         const MAIN = G.DATA.chapters.filter(function (c) { return !c.side; });   // 서브 스토리 챕터는 책장에 넣지 않음
         const count = U.el('div', 'g-mono', { text: MAIN.length + ' VOLUMES' });
         /* 오른쪽 위: 기록 내보내기 · 불러오기 */
         /* 오른쪽 위: 설정 (효과음 · 기록 내보내기 · 불러오기) */
         const btnSet = G.settings.button(s);
         btnSet.classList.add('cs-io-btn', 'is-first');
-        top.append(back, badge, count, btnSet);
+        top.append(back, G.homeButton(), badge, count, btnSet);   // ◎ 메인 화면(로비)으로 바로
         s.appendChild(top);
 
         const shelf = U.el('div', 'cs-shelf');
@@ -340,7 +265,7 @@
               if (!open) {
                 /* 잠긴 챕터: 흐린 표지, 누르면 한 번 떨렸다가 제자리 (입장 불가) */
                 c.wrap.classList.add('is-locked');
-                c.btn.insertAdjacentHTML('beforeend', '<div class="cs-cover-lock">' + U.svgIcon('i-lock') + '<span>LOCKED</span></div>');
+                c.btn.insertAdjacentHTML('beforeend', '<div class="cs-book-lock">' + U.svgIcon('i-lock') + '<span>LOCKED</span></div>');
                 c.btn.addEventListener('click', function () {
                   c.wrap.classList.remove('is-denied'); void c.wrap.offsetWidth; c.wrap.classList.add('is-denied');
                 });

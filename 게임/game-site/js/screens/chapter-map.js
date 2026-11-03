@@ -65,7 +65,7 @@
           e.stopPropagation();
           G.heroList(s, { backLabel: 'STAGE SELECT', badge: '<span class="num">HERO</span><span>CHARACTER LIST</span>' });
         });
-        top.append(back, U.el('div', 'g-badge', { html: '<span class="num">02.</span><span>' + U.esc(ch.title) + ' // STAGE SELECT</span>' }), heroBtn, recBtn, (function () { const b = G.settings.button(s); b.classList.add('cm-set-btn'); return b; })());
+        top.append(back, G.homeButton(), U.el('div', 'g-badge', { html: '<span class="num">02.</span><span>' + U.esc(ch.title) + ' · STAGE SELECT</span>' }), heroBtn, recBtn, (function () { const b = G.settings.button(s); b.classList.add('cm-set-btn'); return b; })());
         s.appendChild(top);
 
         /* 타임라인 */
@@ -113,7 +113,7 @@
           if (st.boss) tags.push('<span class="cm-tag warn">BOSS</span>');
           if (G.save.isCleared(st.id)) tags.push('<span class="cm-tag">CLEAR</span>');
           popup.innerHTML =
-            '<div class="cm-popup-eyebrow">' + U.esc(ch.title) + ' // STAGE</div>' +
+            '<div class="cm-popup-eyebrow">' + U.esc(ch.title) + ' · STAGE</div>' +
             '<div class="cm-popup-name">' + U.esc(st.name) + '</div>' +
             (st.subtitle ? '<div class="cm-popup-sub">' + U.esc(st.subtitle) + '</div>' : '') +
             '<div class="cm-popup-rule"></div>' +

@@ -135,3 +135,49 @@
 .lb-bottom { position: absolute; right: 44px; bottom: 30px; display: flex; align-items: center; }
 .lb-bottom .lb-ico-btn { width: 100px; }
 .lb-bottom .lb-ico-btn + .lb-ico-btn { border-left: 1px solid rgba(247, 244, 238, 0.22); }
+
+/* ==============================================================================
+   버튼 크기 — 휴대폰(캔버스가 0.4배 안팎으로 줄어듦)에서도 누르기 쉽고 읽히도록 키움
+   ============================================================================== */
+.lb-player { left: 48px; top: 30px; gap: 22px; }
+.lb-lv small { font-size: 15px; }
+.lb-lv b { font-size: 54px; }
+.lb-nick { font-size: 34px; }
+.lb-uid { font-size: 17px; }
+.lb-exp { width: 200px; height: 3px; }
+
+.lb-ico-btn { gap: 10px; font-size: 21px; }
+.lb-ico-btn .lb-ico { width: 52px; height: 52px; }
+.lb-side { left: 40px; top: 146px; gap: 12px; }
+.lb-side .lb-ico-btn { width: 112px; }
+
+.lb-top { right: 40px; top: 28px; gap: 14px; }
+.lb-cur { height: 60px; gap: 12px; padding: 0 28px 0 20px; font-size: 24px; }
+.lb-cur i { width: 28px; height: 28px; }
+.lb-top-sep { width: 10px; }
+.lb-top-btn { width: 66px; height: 66px; }
+.lb-top-btn .lb-ico { width: 42px; height: 42px; margin: 12px; }
+
+.lb-menu { right: 120px; top: 196px; width: 640px; grid-template-rows: 196px 150px 150px; gap: 10px; }
+.lb-card-txt { left: 22px; bottom: 18px; }
+.lb-card-txt em { font-size: 30px; }
+.lb-card-txt b { margin-top: 9px; font-size: 20px; }
+.lb-card-txt small { margin-top: 8px; font-size: 17px; }
+.lb-card-story .lb-card-txt { left: 30px; bottom: 24px; }
+.lb-card-story .lb-card-txt em { font-size: 58px; }
+.lb-card-story .lb-card-txt b { margin-top: 12px; font-size: 24px; }
+.lb-card-tag { left: 22px; top: 18px; font-size: 18px; }
+.lb-card-new { left: 22px; top: 20px; width: 10px; height: 10px; }
+.lb-card-lock { right: 16px; top: 16px; gap: 8px; font-size: 15px; }
+.lb-card-lock svg { width: 24px; height: 24px; }
+
+.lb-banner { left: 48px; bottom: 30px; width: 440px; }
+.lb-banner-view { height: 136px; }
+.lb-slide-txt em { font-size: 14px; }
+.lb-slide-txt b { font-size: 22px; }
+.lb-slide-txt small { font-size: 15px; }
+.lb-banner-dots { gap: 8px; margin-top: 12px; }
+.lb-banner-dots button { width: 34px; height: 4px; }
+
+.lb-bottom { right: 36px; bottom: 26px; }
+.lb-bottom .lb-ico-btn { width: 124px; }
